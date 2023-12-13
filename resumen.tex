@@ -1,0 +1,64 @@
+\documentclass[a4paper]{report}
+\usepackage{amsmath, amscd, amssymb, amsthm, latexsym}
+\usepackage[spanish]{babel}
+\usepackage{enumerate}
+\usepackage{float}
+\usepackage[table]{xcolor}
+\usepackage{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{graphics}
+\usepackage{tikz}
+\usepackage{multirow}
+\usepackage{clrscode3e}
+\usepackage{environ}
+\usepackage[skip=10pt,indent=20pt]{parskip}
+
+
+\graphicspath{{img/}}
+
+\hypersetup{
+    colorlinks=true,%
+    linkcolor=blue!80!red,%
+    urlcolor=green!70!black
+}
+
+\captionsetup[figure]{%
+    font=small,%
+    justification=centering,%
+    width=0.6\textwidth
+}
+
+% Comandos caseros
+\newcommand{\BigO}[1]{\ensuremath{\mathcal{O}(#1)}}
+\newcommand{\BigOmega}[1]{\ensuremath{\Omega(#1)}}
+\newcommand{\BigTheta}[1]{\ensuremath{\Theta(#1)}}
+
+\newcommand{\code}{\texttt}
+
+\newcommand{\si}{\text{si }}
+\newcommand{\ecc}{\text{en caso contrario}}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+
+\newtheorem*{theorem*}{Teorema}
+\newtheorem*{lemma*}{Lema}
+
+
+\title{%
+    Resumen para Teoría de Lenguajes
+}
+\author{Tomás Spognardi}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\end{document}
