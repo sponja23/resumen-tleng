@@ -1,0 +1,76 @@
+\section{Definiciones Básicas}
+
+Primero, algunas definiciones:
+
+\begin{itemize}
+    \item Un \textbf{alfabeto} $\Sigma$ es un conjunto finito, no vacío, de \textbf{símbolos}.
+    \item Una \textbf{cadena} $\alpha$ es una secuencia finita de símbolos de algún alfabeto: $\alpha = a_1 a_2 ... a_k$.
+    \begin{itemize}
+        \item La cadena vacía, denotada por $\lambda$, no tiene ningún símbolo.
+    \end{itemize}
+    \item Una cadena $\alpha = a_1 a_2 ... a_k$ se puede \textbf{concatenar} con un símbolo $b$, formando una nueva cadena $b \cdot \alpha = b a_1 a_2 ... a_k$. A veces se omite el símbolo $\cdot$, dejando sólo la expresión $b \alpha$.
+    \item Se puede \textbf{extender} esta definición para permitir concatenar cadenas con otras cadenas:
+    $$
+    \begin{aligned}
+        \alpha \cdot \lambda & := \alpha \\
+        \alpha \cdot (b \cdot \beta) & := (\alpha \cdot b) \cdot \beta
+    \end{aligned}
+    $$
+\end{itemize}
+
+\section{Reverso}
+
+Dada una cadena $\alpha = a_1 a_2 ... a_k$, su \textbf{reverso} es la cadena formada por los símbolos de $\alpha$ en el orden inverso: $\alpha^r = a_k a_{k-1} ... a_1$. Se puede definir de forma inductiva:
+$$
+\begin{aligned}
+    \lambda^r & := \lambda \\
+    (a \cdot \alpha)^r & := \alpha^r \cdot a
+\end{aligned}
+$$
+
+Tiene las siguientes propiedades:
+\begin{itemize}
+    \item Es \textbf{involutiva}: $(\alpha^r)^r = \alpha$.
+    \item Es \textbf{antidistributiva} con respecto a la concatenación: $(\alpha \cdot \beta)^r = \beta^r \cdot \alpha^r$.
+\end{itemize}
+
+\section{Clausura de Kleene}
+
+Dado un alfabeto $\Sigma$, su \textbf{clausura de Kleene}, denotada $\Sigma^*$, es el conjunto de todas las cadenas formadas por símbolos de $\Sigma$. Se puede definir inductivamente de la siguiente manera:
+$$
+\begin{aligned}
+    & \lambda \in \Sigma^* \\
+    \forall a \in \Sigma, \alpha \in \Sigma^*,\ & (\alpha \in \Sigma^* \implies a \alpha \in \Sigma^*)
+\end{aligned}
+$$
+Por otro lado, la \textbf{clausura positiva} de $\Sigma$, denotada por $\Sigma^+$, es el conjunto de todas las cadenas \textbf{no vacías} con símbolos de $\Sigma$. Es decir, $\Sigma^+ = \Sigma^* \setminus \{\lambda\}$.
+
+\section{Lenguajes}
+
+Dado un alfabeto $\Sigma$, un \textbf{lenguaje} $\L$ sobre ese alfabeto es simplemente un conjunto de cadenas de $\Sigma^*$ ($\L \subseteq \Sigma^*$).
+
+\subsection{Operaciones entre Lenguajes}
+
+Si $\L$ y $\L'$ son dos lenguajes definidos sobre el mismo alfabeto $\Sigma^*$, se pueden realizar una serie de operaciones sobre los mismos.
+
+\subsubsection{Operaciones de Conjuntos}
+
+Las operaciones de \textbf{unión}, \textbf{intersección} y \textbf{complemento} son las mismas que se definen para cualquier conjunto:
+$$
+\begin{aligned}
+    \L^c & := \{\alpha \in \Sigma^* \mid \alpha \notin \L\} \\
+    \L \cup \L' & := \{\alpha \in \Sigma^* \mid \alpha \in \L \lor \alpha \in \L'\} \\
+    \L \cap \L' & := \{\alpha \in \Sigma^* \mid \alpha \in \L \land \alpha \in \L'\} \\
+\end{aligned}
+$$
+
+\subsubsection{Concatenación}
+
+La \textbf{concatenación} entre los lenguajes $\L$ y $\L'$, denotada $\L \cdot \L'$ o simplemente $\L\L'$, es el lenguaje formado por las cadenas resultantes de concatenar un elemento de $\L$ con uno de $\L'$:
+$$\L \cdot \L' := \{\alpha \cdot \beta \mid \alpha \in \L, \beta \in \L'\}$$
+
+Tiene las siguientes propiedades:
+\begin{itemize}
+    \item Es \textbf{asociativa}: $\L \cdot (\L' \cdot \L'') = (\L \cdot \L') \cdot \L''$
+    \item Es \textbf{distributiva} con respecto a la unión: $\L \cdot (\L' \cup \L'') = \L \cdot \L' \cup \L \cdot \L''$
+\end{itemize}
