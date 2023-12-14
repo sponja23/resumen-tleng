@@ -21,10 +21,21 @@
 
 \graphicspath{{img/}}
 
+% Links
 \hypersetup{
     colorlinks=true,%
     linkcolor=blue!80!red,%
     urlcolor=green!70!black
+}
+
+% Márgenes
+\geometry{
+    a4paper,
+    total={170mm,257mm},
+    left=30mm,
+    right=30mm,
+    top=30mm,
+    bottom=30mm,
 }
 
 % Saco la sangría
@@ -52,6 +63,9 @@
 
 % Comandos tleng
 \renewcommand{\L}{\mathcal{L}}
+\newcommand{\deriv}{\Rightarrow}
+\newcommand{\derivs}{\overset{*}{\Rightarrow}}
+\newcommand{\derivp}{\overset{+}{\Rightarrow}}
 
 \newtheorem*{theorem*}{Teorema}
 \newtheorem*{lemma*}{Lema}
@@ -70,8 +84,6 @@
 \tableofcontents
 
 \newpage
-
-\chapter{Lenguajes}
 
 \input{sections/introduccion-lenguajes.tex}
 

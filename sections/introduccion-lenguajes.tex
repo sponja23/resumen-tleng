@@ -1,6 +1,8 @@
-\section{Definiciones Básicas}
+\chapter{Introducción a los Lenguajes}
 
-Primero, algunas definiciones:
+\section{Alfabetos y Cadenas}
+
+Primero, algunas definiciones básicas:
 
 \begin{itemize}
     \item Un \textbf{alfabeto} $\Sigma$ es un conjunto finito, no vacío, de \textbf{símbolos}.
@@ -8,17 +10,44 @@ Primero, algunas definiciones:
     \begin{itemize}
         \item La cadena vacía, denotada por $\lambda$, no tiene ningún símbolo.
     \end{itemize}
-    \item Una cadena $\alpha = a_1 a_2 ... a_k$ se puede \textbf{concatenar} con un símbolo $b$, formando una nueva cadena $b \cdot \alpha = b a_1 a_2 ... a_k$. A veces se omite el símbolo $\cdot$, dejando sólo la expresión $b \alpha$.
-    \item Se puede \textbf{extender} esta definición para permitir concatenar cadenas con otras cadenas:
-    $$
-    \begin{aligned}
-        \alpha \cdot \lambda & := \alpha \\
-        \alpha \cdot (b \cdot \beta) & := (\alpha \cdot b) \cdot \beta
-    \end{aligned}
-    $$
 \end{itemize}
 
-\section{Reverso}
+\subsection{Operaciones de Cadenas}
+
+\subsubsection{Concatenación}
+
+Una cadena $\alpha = a_1 a_2 ... a_k$ se puede \textbf{concatenar} con un símbolo $b$, formando una nueva cadena $b \cdot \alpha = b a_1 a_2 ... a_k$. A veces se omite el símbolo $\cdot$, dejando sólo la expresión $b \alpha$.
+
+Se puede extender esta definición para permitir concatenar cadenas con \textbf{otras cadenas}:
+$$
+\begin{aligned}
+    \alpha \cdot \lambda & := \alpha \\
+    \alpha \cdot (b \cdot \beta) & := (\alpha \cdot b) \cdot \beta
+\end{aligned}
+$$
+
+Esto último nos permite definir la \textbf{repetición}/\textbf{potencia} de cadenas:
+$$
+\begin{aligned}
+    \alpha^0 & := \lambda \\
+    \alpha^n & := \alpha \cdot \alpha^{n-1}
+\end{aligned}
+$$
+
+\subsubsection{Longitud}
+
+La \textbf{longitud} de una cadena $\alpha = a_1 a_2 ... a_k$ es la cantidad de símbolos que tiene: $|\alpha| = k$. Se puede definir de forma inductiva:
+$$
+\begin{aligned}
+    |\lambda| & := 0 \\
+    |a \cdot \alpha| & := 1 + |\alpha|
+\end{aligned}
+$$
+
+Claramente, la longitud de la concatenación entre dos cadenas es la suma de sus longitudes:
+$$|\alpha \cdot \beta| = |\alpha| + |\beta|$$
+
+\subsubsection{Reverso}
 
 Dada una cadena $\alpha = a_1 a_2 ... a_k$, su \textbf{reverso} es la cadena formada por los símbolos de $\alpha$ en el orden inverso: $\alpha^r = a_k a_{k-1} ... a_1$. Se puede definir de forma inductiva:
 $$
@@ -32,9 +61,10 @@ Tiene las siguientes propiedades:
 \begin{itemize}
     \item Es \textbf{involutiva}: $(\alpha^r)^r = \alpha$.
     \item Es \textbf{antidistributiva} con respecto a la concatenación: $(\alpha \cdot \beta)^r = \beta^r \cdot \alpha^r$.
+    \item $|\alpha^r| = |\alpha|$
 \end{itemize}
 
-\section{Clausura de Kleene}
+\subsection{Clausura de Kleene}
 
 Dado un alfabeto $\Sigma$, su \textbf{clausura de Kleene}, denotada $\Sigma^*$, es el conjunto de todas las cadenas formadas por símbolos de $\Sigma$. Se puede definir inductivamente de la siguiente manera:
 $$
@@ -74,3 +104,101 @@ Tiene las siguientes propiedades:
     \item Es \textbf{asociativa}: $\L \cdot (\L' \cdot \L'') = (\L \cdot \L') \cdot \L''$
     \item Es \textbf{distributiva} con respecto a la unión: $\L \cdot (\L' \cup \L'') = \L \cdot \L' \cup \L \cdot \L''$
 \end{itemize}
+
+La definición de \textbf{repetición}/\textbf{potencia} de cadenas se puede extender a lenguajes:
+$$
+\begin{aligned}
+    \L^0 & := \{\lambda\} \text{ (excepto para $\L = \emptyset$)}\\
+    \L^n & := \L \cdot \L^{n - 1} = \{\alpha_1 \cdot \alpha_2 \cdots \alpha_n \mid \alpha_i \in \L\ \forall i \in \{1, ..., n\}\}
+\end{aligned}
+$$
+
+\subsubsection{Clausura de Kleene}
+
+La \textbf{clausura de Kleene} y la \textbf{clausura positiva} también se pueden extender a lenguajes:
+$$
+\begin{aligned}
+    \L^* & := \bigcup_{i=0}^\infty \L^i = \{\alpha_1 \cdot \alpha_2 \cdots \alpha_n \mid n \in \N,\ \alpha_i \in \L\ \forall i \in \{1, ..., n\}\} \\
+    \L^+ & := \bigcup_{i=1}^\infty \L^i = \L \cdot \L^*
+\end{aligned}
+$$
+Es decir, la clausura de Kleene de un lenguaje son todas las cadenas que se pueden formar concatenando 0 o más de sus elementos.
+
+\subsubsection{Reverso}
+
+Por último, también se puede extender la operación de \textbf{reverso}: para un lenguaje $\L$, su reverso $\L^r$ tiene todas las cadenas que son reversos de elementos del lenguaje original. Es decir:
+$$\L^r := \{\alpha^r \mid \alpha \in \L\}$$
+
+\subsection{Gramáticas}
+
+Una \textbf{gramática} $G$ es una forma concisa de definir un lenguaje. Concretamente, es una 4-upla $\langle V_N, V_T, P, S \rangle$, cuyos componentes representan:
+\begin{itemize}
+    \item $V_N$ es el alfabeto de \textbf{símbolos no-terminales}: éstos se pueden considerar ``variables sintácticas'', y deben ser reemplazados por medio de producciones para generar una cadena. Se suelen denotar por letras en mayúscula ($A, B, C, ...$).
+    \item $V_T$ es el alfabeto de \textbf{símbolos terminales}: éstos son los que forman parte de las cadenas producidas por la gramática.
+    \item $P$ es el conjunto de \textbf{producciones}, que son de la forma $\alpha \to \beta$ donde, $\alpha, \beta \in (V_N \cup V_T)^*$\footnote{En realidad, $\alpha$ debe tener al menos un símbolo no-terminal, así que pertenece al conjunto $(V_N \cup V_T)^* V_N (V_N \cup V_T)^*$}. $\alpha$ es denominada la \textbf{cabeza} y $\beta$ es el \textbf{cuerpo}.
+    \item $S \in V_N$ es el símbolo inicial de la gramática.
+\end{itemize}
+
+El \textbf{lenguaje generado} por la gramática $\L(G) \subseteq V_T^*$ es el conjunto de cadenas que se forman al empezar por $S$ y aplicando una serie de \textbf{derivaciones} hasta llegar a una cadena de símbolos terminales.
+
+\subsubsection{Derivaciones}
+
+Dada una gramática $G$, la derivación $\underset{G}{\Rightarrow}$ es una relación entre cadenas de $(V_N \cup V_T)^*$\footnote{Como las cabezas de las producciones deben tener al menos un símbolo no-terminal, $\underset{G}{\Rightarrow} \subseteq (V_N \cup V_T)^* V_N (V_N \cup V_T)^* \times (V_N \cup V_T)^*$.}, y está definida por:
+$$\gamma_1 \alpha \gamma_2 \underset{G}{\Rightarrow} \gamma_1 \beta \gamma_2 \iff \alpha \to \beta \in P$$
+La clausura transitiva de esta (o cualquier) relación es la mínima\footnote{Mínima en términos de inclusión.} relación que contiene a $\underset{G}{\Rightarrow}$ y es transitiva: se denota $\overset{+}{\underset{G}{\Rightarrow}}$. Por otro lado, la clausura reflexo-transitiva $\overset{*}{\underset{G}{\Rightarrow}}$ está dada por $\mathrm{\overset{*}{\underset{G}{\Rightarrow}}} = \mathrm{\overset{+}{\underset{G}{\Rightarrow}}} \cup \{(\alpha, \alpha) \mid \alpha \in (V_N \cup V_T)^*\}$. Concretamente,
+$$
+\begin{aligned}
+    \alpha \overset{+}{\underset{G}{\Rightarrow}} \beta & \iff \exists \gamma_1, ..., \gamma_k \in (V_N \cup V_T)^* \mid \alpha \underset{G}{\Rightarrow} \gamma_1 \underset{G}{\Rightarrow} \cdots \underset{G}{\Rightarrow} \gamma_k \underset{G}{\Rightarrow} \beta \\
+    \alpha \overset{*}{\underset{G}{\Rightarrow}} \beta & \iff \alpha \overset{+}{\underset{G}{\Rightarrow}} \beta \lor \alpha = \beta
+\end{aligned}
+$$
+Por ende, la gramática generada por el lenguaje $G$ se puede expresar como:
+$$\L(G) := \{\alpha \in V_T^* \mid S \overset{+}{\underset{G}{\Rightarrow}} \alpha\}$$
+
+\subsection{Jerarquía de Chomsky}
+
+El espacio de todos los lenguajes definidos sobre un alfabeto dado se puede particionar en la llamada \textbf{jerarquía de Chomsky}. Está compuesta por 4 niveles, cada uno contenido en el siguiente.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics*[width=0.6\textwidth]{jerarquía-chomsky.png}
+    \caption*{Diagrama de Venn de la jerarquía de Chomsky.}
+\end{figure}
+
+\subsubsection{Lenguajes Regulares}
+
+Los \textbf{lenguajes regulares} son aquellos que son generados por las gramáticas en las que todas las producciones son de la forma:
+$$
+\begin{aligned}
+    A & \to b \\
+    A & \to b A \\
+    A & \to \lambda
+\end{aligned}
+$$
+Donde $A \in V_N, b \in V_T$.
+
+Las gramáticas que cumplen dichas reglas se denominan \textbf{regulares a derecha}: si, en lugar de permitir $A \to b A$, se permiten las producciones $A \to A b$, se obtienen las gramáticas \textbf{regulares a izquierda}. Ambos tipos de gramática son capaces de expresar cualquier lenguaje regular (y por ende tienen el mismo poder expresivo).
+
+% TODO: Referencia
+Como se explica \textbf{más adelante}, estos son exactamente los lenguajes que se pueden reconocer por autómatas finitos.
+
+\subsubsection{Lenguajes Libres de Contexto}
+
+Los \textbf{lenguajes libres de contexto} son los generados por gramáticas donde todas las producciones son de la forma:
+$$A \to \beta$$
+Con $A \in V_N, \beta \in (V_N \cup V_T)^*$.
+
+% TODO: Referencia
+Como se explica \textbf{más adelante}, estos son exactamente los lenguajes que se pueden reconocer por \textbf{autómatas de pila}.
+
+\subsubsection{Lenguajes Sensitivos al Contexto}
+
+Los \textbf{lenguajes sensitivos al contexto} son los generados por grámaticas donde todas las producciones son de la forma:
+$$\alpha A \beta \to \alpha \gamma \beta$$
+Donde $A \in V_N, \gamma \in (V_N \cup V_T)^+$ ($\gamma$ no puede ser la cadena vacía). Además, se permite la producción $S \to \lambda$.
+
+Estos lenguajes son exactamente los lenguajes que se pueden reconocer por \textbf{máquinas de Turing que están limitadas linealmente en espacio} (en vez de tener una cinta infinita, sólo pueden usar una porción dada por una función lineal de la entrada).
+
+\subsubsection{Lenguajes Recursivamente Enumerables}
+
+Los \textbf{lenguajes recursivamente enumerables} incluyen a cualquier lenguaje que se puede expresar en términos de una gramática. Corresponden a los conjuntos que reconoce alguna \textbf{máquina de Turing}.
