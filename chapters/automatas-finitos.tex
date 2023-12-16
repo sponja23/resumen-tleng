@@ -302,8 +302,30 @@ La construcción realizada en la demostración puede ser adaptada fácilmente a 
 Es fácil ver que a partir de un AFD $M$ se puede construir un AFND $M'$ equivalente tomando $\delta'(q, a) = \{\delta(q, a)\}$. A continuación, veremos que a partir de un AFND se puede construir un AFD equivalente:
 
 \begin{theorem*}
-    Dado un AFND $M = \langle Q, \Sigma, \delta, q_0, F \rangle$, existe un AFD $M' = \langle Q', \Sigma, \delta', q_0', F' \rangle$ tal que $\L(M) = \L(M')$.
+    Dado un AFND $M = \langle Q, \Sigma, \delta, q_0, F \rangle$, existe un AFD $M'$ tal que $\L(M) = \L(M')$.
 \end{theorem*}
 \begin{proof}
+    Nuevamente, la demostración será constructiva: tomamos $M' = \langle Q', \Sigma, \delta', q_0', F' \rangle$, donde
+    \begin{itemize}
+        \item $Q' = \mathcal P (Q)$.
+        \item $F' = \{S \in Q' \mid S \cap F \neq 0\}$.
+        \item $q_0' = \{q_0\}$
+        \item $\delta'(S, a) = \bigcup_{q \in S} \delta(q, a)$
+    \end{itemize}
+
+    Antes de demostrar que este autómata es equivalente, veamos que, para cualquier cadena $w \in \Sigma^*$,
+    $$\hat \delta'(q_0', w) = \hat \delta(q_0, w)$$
     
+    La demostración será por inducción en $|w|$:
+    \begin{itemize}
+        \item Si $|w| = 0 \iff w = \lambda$, se tiene:
+        $$\hat \delta'(q_0', \lambda) = q_0' = \{q_0\} = \hat \delta(q_0, \lambda)$$
+        \item Si vale para $w$ con $|w| = n$,
+        $$\hat \delta'(q_0', w \cdot a) = \delta'(\hat \delta(q_0', w), a) = \bigcup_{q \in \hat \delta'(q_0', w)} \delta(q, a) \overset{HI}{=} \bigcup_{q \in \hat \delta(q_0, w)} \delta(q, a) = \hat \delta(q_0, w \cdot a)$$
+    \end{itemize}
+
+    Teniendo este resultado, la demostración de equivalencia es bastante directa:
+    $$w \in \L(M) \iff \hat \delta(q_0, w) \cap F \neq \emptyset \iff \hat \delta'(q_0', w) \cap F \neq \emptyset \iff \hat \delta'(q_0', w) \in F' \iff w \in \L(M')$$
 \end{proof}
+
+Al igual que en los casos anteriores, esta demostración se puede adaptar a un algoritmo que \textbf{determiniza} un AFND. Sin embargo, a diferencia de las equivalencias anteiores, este procedimiento es más costoso: el nuevo AFD tiene $2^{|Q|}$ estados\footnote{La cantidad de estados se puede disminuir si se descartan los \textbf{estados inaccesibles} (aquellos para los que no hay un camino desde $q_0$). Aún así, es posible que el autómata quede con $\BigO{2^{|Q|}}$ estados.}.
