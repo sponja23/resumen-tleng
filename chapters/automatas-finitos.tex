@@ -1,0 +1,74 @@
+\chapter{Autómatas Finitos y Expresiones Regulares}
+
+\section{Autómatas Finitos Determinísticos}
+
+\subsection{Definición}
+
+Un \textbf{autómata finito determinístico} (AFD) $M$ es una 5-upla $\langle Q, \Sigma, \delta, q_0, F \rangle$ donde:
+\begin{itemize}
+    \item $Q$ es el conjunto finito de \textbf{estados del autómata}.
+    \item $\Sigma$ es el \textbf{alfabeto de entrada}.
+    \item $\delta: Q \times \Sigma \to Q$ es la \textbf{función de transición}: si el autómata se encuentra en el estado $q \in Q$ y lee el símbolo $a \in \Sigma$ de la entrada, pasa al estado $\delta(q, a)$.
+    \item $q_0 \in Q$ es el \textbf{estado inicial}.
+    \item $F \subseteq Q$ es el conjunto de \textbf{estados finales}/\textbf{estados de aceptación}.
+\end{itemize}
+
+
+Estos autómatas toman una cadena de entrada $w \in \Sigma^*$ e iteran por los símbolos de la misma. Empezando en el estado inicial, cada símbolo indica el siguiente estado a tomar. Si, al terminar de leer la entrada, el autómata se encuentra en un estado final, la cadena es \textbf{aceptada}. De lo contrario, es \textbf{rechazada}.
+
+\subsubsection{Visualización}
+
+Estos autómatas se suelen representar como \textbf{grafos} $G = \langle V, E \rangle$, donde:
+\begin{itemize}
+    \item Los \textbf{nodos} representan los estados del autómata ($V = Q$).
+    \item Las \textbf{aristas} están dadas por la función de transición: $(v, w) \in E \iff \exists a \in \Sigma \mid \delta(v, a) = w$. Además, las aristas se etiquetan con los símbolos por los cuales se puede tomar la transición.
+    \item El estado inicial se representa con una arista entrante que no viene de otro estado.
+    \item Los estados finales se respresentan con doble borde.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+        \node[state, initial] (0) {$q_0$};
+        \node[state, accepting, right of=0] (1) {$q_1$};
+        \node[state, below right of=0] (2) {$q_2$};
+
+        \draw   (0) edge[above] node{$a$} (1)
+                (0) edge[above] node{$b$} (2)
+                (1) edge[below, bend left, right=0.3] node{$a,b$} (2)
+                (2) edge[above, bend left, left=0.3] node{$b$} (1)
+                (2) edge[loop right] node{$a$} (2);
+    \end{tikzpicture}
+    \caption*{Visualización del autómata $M = \langle \{q_0, q_1, q_2\}, \{a, b\}, \delta, q_0, \{q_1\} \rangle$, donde la función de transición $\delta$ está dada por las flechas entre los estados.}
+\end{figure}
+
+\subsection{Configuraciones Instantáneas}
+
+La ejecución de los AFDs se puede formalizar usando el concepto de las \textbf{configuraciones instantáneas}: $\langle q, s \rangle \in Q \times \Sigma^*$ representa el punto de la ejecución del autómata en el que se encuentra en el estado $q$ y tiene a $s$ como entrada restante.
+
+La función de transición $\delta$ de un autómata $M$ se puede adaptar a una relación entre configuraciones instantáneas, la \textbf{relación de transición} $\vdash_M$:
+$$
+(q, a \cdot w) \vdash_M (r, w) \iff \delta(q, a) = r
+$$
+Notemos que, en el caso de los autómatas finitos, esta relación es una \textbf{función} (para cada $(q, s)$, hay un único $(q', s')$ tal que $(q, s) \vdash_m (q', s')$) y es \textbf{total}, excepto por los pares $(q, \lambda)$.
+
+Luego, el \textbf{lenguaje aceptado} por el autómata $M$, denotado $\L(M)$ se puede definir como:
+$$
+\L(M) := \{ w \in \Sigma^* \mid \exists q_f \in F : (q_0, w) \vdash^* (q_f, \lambda) \}
+$$
+
+\subsection{Función de Transición Extendida}
+
+Una forma alternativa (y análoga) de dar el lenguaje aceptado es por medio de la \textbf{función de transición extendida}. Esta es una función $\hat \delta : Q \times \Sigma^* \to \mathcal P (Q)$ (toma cadenas en vez de símbolos) definida de la siguiente manera:
+$$
+\begin{aligned}
+    \hat \delta(q, \lambda) & := \{q\} \\
+    \hat \delta(q, w \cdot a) & := \delta (\hat \delta (q, w), a)
+\end{aligned}
+$$
+Donde $q \in Q, a \in \Sigma, w \in \Sigma^*$.
+
+Bajo esta definición el conjunto de estados aceptados es simplemente:
+$$
+\L (M) := \{w \in \Sigma^* \mid \hat \delta (q_0, w) \in F \}
+$$
