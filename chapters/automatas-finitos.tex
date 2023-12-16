@@ -99,7 +99,7 @@ No obstante, la distinción entre autómatas completos e incompletos no es muy i
 \begin{proof}
     Si $M = \langle Q, \Sigma, \delta, q_0, F \rangle$, basta con tomar el autómata $M' = \langle Q \cup \{q_T\}, \Sigma, \delta', q_0, F \rangle$, donde $q_T$ es un nuevo estado, llamado \textbf{estado trampa}. La función de transición se extiende de la siguiente manera:
     $$
-    \delta' (q, a) =
+    \delta' (q, a) :=
     \begin{cases}
         \delta(q, a) & \si q \in Q \land \delta(q, a) \neq \indef \\
         q_T & \si q = q_T \lor \delta(q, a) = \indef
@@ -154,5 +154,102 @@ Este resultado implica que los autómatas incompletos tienen el mismo poder expr
                 (2) edge[below, bend left] node{$a,b$} (3)
                 (3) edge[loop below] node{$a,b$} (3);
     \end{tikzpicture}
-    \caption*{Versión completa del autómata anterior.}
+    \caption*{Versión completa del autómata anterior, obtenida a partir de agregar un estado trampa.}
 \end{figure}
+
+\section{Autómatas Finitos No Determinísticos}
+
+\subsection{Definición}
+
+Un \textbf{autómata finito no determinístico} (AFND) $M$ es una 5-upla $\langle Q, \Sigma, \delta, q_0, F \rangle$. Sus componentes tienen la misma semántica que para los AFDs, pero en este caso se tiene $\delta : Q \times \Sigma \to \mathcal P (Q)$, es decir, el codominio de $\delta$ son los subconjuntos de $Q$. Esto es porque, cuando el autómata está en el estado $q$ y lee el símbolo $a$, es capaz tomar alguna de varias transiciones posibles.
+
+% TODO: AFND de ejemplo
+
+Este cambio requiere re-definir la \textbf{relación de transición} entre configuraciones instantáneas $\vdash_M$ (ésta deja de ser una función):
+$$
+(q, w \cdot a) \vdash_M (r, w) \iff r \in \delta(q, a)
+$$
+
+Y también la \textbf{función de transición extendida} $\hat \delta : Q \times \Sigma^* \to \mathcal P (Q)$:
+$$
+\begin{aligned}
+    \hat \delta(q, \lambda) & := \{q\} \\
+    \hat \delta(q, w \cdot a) & := \{p \in Q \mid \exists r \in \hat \delta (q, w) : p \in \delta (r, a)\} = \bigcup_{r \in \hat \delta(q, w)} \delta(r, a)
+\end{aligned}
+$$
+
+El lenguaje aceptado por el autómata $M$ es el conjunto de cadenas en las que \textbf{alguno} de todos los posibles caminos de ejecución termina en un estado final. Es decir,
+$$
+w \in \L(M) \iff \hat \delta(q_0, w) \cap F \neq \emptyset \iff \exists q_f \in F \mid (q_0, w) \vdash_M^* (q_f, \lambda)
+$$
+
+\subsection{Transiciones Lambda}
+
+Un autómata finito no determinístico con transiticiones-$\lambda$ (AFND-$\lambda$) es uno en el cual la función de transición es de la forma $delta : Q \times (\Sigma \cup \{\lambda\}) \to \mathcal P (Q)$. Se agrega un ``símbolo'' $\lambda$ que se puede tomar \textbf{sin consumir ningún símbolo} de la entrada.
+
+% TODO: AFND-lambda de ejemplo
+
+Esto se puede formalizar por medio de la \textbf{relación de transición} entre configuraciones instantáneas:
+$$
+(q, w) \vdash_M (r, w') \iff (w = w' \cdot a \land r \in \delta(q, a)) \lor (w = w' \land r \in \delta(q, \lambda))
+$$
+
+Para definir la función de transición extendida, primero conviene introducir la \textbf{clausura lambda}: $Cl_\lambda(q)$ es el conjunto de estados que son alcanzables desde $q$ por medio de transiciones-$\lambda$. Si se define la relación:
+$$q \sim_\lambda r \iff r \in \delta(q, \lambda)$$
+Entonces $r \in Cl_\lambda(q) \iff q \sim_\lambda^* r$. También se puede extender la definición para considerar conjuntos de estados: $Cl_\lambda(S) := \bigcup_{q \in S} Cl_\lambda(q)$.
+
+La \textbf{función de transición extendida} $\hat \delta : Q \times (\Sigma \cup \{\lambda\}) \to \mathcal P (Q)$ pasa a ser:
+$$
+\begin{aligned}
+    \hat \delta (q, \lambda) & := Cl_\lambda(q) \\
+    \hat \delta (q, w \cdot a) & := Cl_\lambda\left(\bigcup_{r \in \hat \delta(q, w)} \delta(r, a) \right)
+\end{aligned}
+$$
+
+\subsubsection{Equivalencia con AFNDs}
+
+Resulta que agregar transiciones-$\lambda$ no aumenta el poder expresivo de los AFNDs:
+
+\begin{theorem*}
+    Dado un AFND-$\lambda$ $M = \langle Q, \Sigma, \delta, q_0, F \rangle$, existe un AFND sin transiciones lambda equivalente.
+\end{theorem*}
+\begin{proof}
+    Hay igual que antes, la demostración es constructiva: exhibimos un autómata $M' = \langle Q, \Sigma, \delta', q_0, F' \rangle$ que cumple $\L(M) = \L(M')$. El conjunto de estados y el estado inicial son los mismos, pero la función de transición y el conjunto de estados finales se reemplazan por:
+    $$
+    \begin{aligned}
+        \delta'(q, a) & := \hat \delta (q, a) = Cl_\lambda\left(\bigcup_{r \in Cl_\lambda(q)} \delta(r, a)\right) \\
+        F' & := \begin{cases}
+            F & \si Cl_\lambda (q_0) \cap F = \emptyset \\
+            F \cup \{q_0\} & \ecc
+        \end{cases}
+    \end{aligned}
+    $$
+    En tal caso, la función de transición extendida del nuevo autómata es:
+    $$
+    \begin{aligned}
+        \hat \delta'(q, \lambda) & := \{q\} \\
+        \hat \delta'(q, w \cdot a) & := \bigcup_{r \in \hat \delta'(q, w)} \delta'(r, a) = 
+    \end{aligned}
+    $$
+    Veamos que $\hat \delta'(q, w) = \hat \delta(q, w) \ \forall w \in \Sigma^+$ por inducción en la longitud:
+    \begin{itemize}
+        \item Cuando $|w| = 1$, se tiene $w = a \in \Sigma$, y luego:
+        $$
+        \hat \delta'(q, \lambda \cdot a)
+        = \bigcup_{r \in \underbrace{\hat \delta'(q, \lambda)}_{\{q\}} } \delta'(r, a)
+        = \delta'(q, a) = \hat \delta(q, a)$$
+        \item Suponiendo que vale para cualquier cadena de longitud $n$, y siendo $w$ una de esas cadenas:
+        $$
+        \begin{aligned}
+            \hat \delta'(q, w \cdot a)
+            & = \bigcup_{r \in \hat \delta'(q, w)} \delta'(r, a)
+            \overset{HI}{=} \bigcup_{r \in \hat \delta(q, w)} \delta'(r, a)
+            = \bigcup_{r \in \hat \delta(q, w)} \hat \delta(r, a) \\
+            & = \bigcup_{r \in \hat \delta(q, w)} Cl_\lambda\left(\bigcup_{r \in Cl_\lambda(q)} \delta(r, a)\right) = \bigcup_{r \in \hat \delta(q, w)} \bigcup_{r \in \underbrace{Cl_\lambda(q)}_{\subseteq \hat \delta(q, w)}} Cl_\lambda(\delta(r, a)) \\
+            & = \bigcup_{r \in \hat \delta(q, w)} Cl_\lambda(\delta(r, a)) = Cl_\lambda\left(\bigcup_{r \in \hat \delta(q, w)} \delta(r, a)\right) = \hat \delta (q, w \cdot a)
+        \end{aligned}
+        $$
+
+    \textbf{TODO}.
+    \end{itemize}
+\end{proof}
