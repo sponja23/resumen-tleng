@@ -16,7 +16,7 @@
 \usepackage{multirow}
 \usepackage{clrscode3e}
 \usepackage{environ}
-\usepackage[skip=10pt,indent=20pt]{parskip}
+\usepackage[skip=10pt,indent=10pt]{parskip}
 
 % Setup de tikz
 \usetikzlibrary{automata, positioning, arrows}
@@ -56,8 +56,6 @@
     bottom=30mm,
 }
 
-% Saco la sangría
-\setlength{\parindent}{0pt}
 
 % \captionsetup[figure]{%
 %     font=small,%
@@ -84,6 +82,7 @@
 \newcommand{\deriv}{\Rightarrow}
 \newcommand{\derivs}{\overset{*}{\Rightarrow}}
 \newcommand{\derivp}{\overset{+}{\Rightarrow}}
+\newcommand{\indef}{\mathrm \perp}
 
 \newtheorem*{theorem*}{Teorema}
 \newtheorem*{lemma*}{Lema}
