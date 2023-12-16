@@ -183,14 +183,26 @@ Este resultado implica que los autómatas incompletos tienen el mismo poder expr
 
 Un \textbf{autómata finito no determinístico} (AFND) $M$ es una 5-upla $\langle Q, \Sigma, \delta, q_0, F \rangle$. Sus componentes tienen la misma semántica que para los AFDs, pero en este caso se tiene $\delta : Q \times \Sigma \to \mathcal P (Q)$, es decir, el codominio de $\delta$ son los subconjuntos de $Q$. Esto es porque, cuando el autómata está en el estado $q$ y lee el símbolo $a$, es capaz tomar alguna de varias transiciones posibles.
 
-% TODO: AFND de ejemplo
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+        \node[state, initial] (0) {$q_0$};
+        \node[state, right of=0] (1) {$q_1$};
+        \node[state, accepting, right of=1] (2) {$q_2$};
+
+        \draw   (0) edge[above, loop above] node{$a,b$} (0)
+                (0) edge[above] node{$a$} (1)
+                (1) edge[above] node{$b$} (2);
+    \end{tikzpicture}
+    \caption*{AFND que acepta cualquier cadena que termina en $ab$. \\ Se puede ver que $\delta(q_0, a) = \{q_0, q_1\}$.}
+\end{figure}
 
 Este cambio requiere re-definir la \textbf{relación de transición} entre configuraciones instantáneas $\vdash_M$ (ésta deja de ser una función):
 $$
 (q, w \cdot a) \vdash_M (r, w) \iff r \in \delta(q, a)
 $$
 
-Esta relación cumple las mismas \hyperref[subsubsec-propiedades-rel-transicion]{propiedades} que las del caso determinístico (excepto por la de determinismo, obviamente).
+La relación de transición cumple las mismas \hyperref[subsubsec-propiedades-rel-transicion]{propiedades} que las del caso determinístico (excepto por la de determinismo, obviamente).
 
 También se debe volver a definir la \textbf{función de transición extendida} $\hat \delta : Q \times \Sigma^* \to \mathcal P (Q)$:
 $$
@@ -211,7 +223,28 @@ Notemos que esta definición automáticamente permite tener autómatas incomplet
 
 Un autómata finito no determinístico con transiticiones-$\lambda$ (AFND-$\lambda$) es uno en el cual la función de transición es de la forma $delta : Q \times (\Sigma \cup \{\lambda\}) \to \mathcal P (Q)$. Se agrega un ``símbolo'' $\lambda$ que se puede tomar \textbf{sin consumir ningún símbolo} de la entrada.
 
-% TODO: AFND-lambda de ejemplo
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+        \node[state, initial] (0) {$q_0$};
+        \node[state, accepting, above right of=0] (1) {$q_1$};
+        \node[state, right of=1] (2) {$q_2$};
+        \node[state, accepting, below right of=0] (3) {$q_1$};
+        \node[state, right of=3] (4) {$q_2$};
+
+        \draw   (0) edge[above, bend left] node{$\lambda$} (1)
+                (1) edge[loop above] node{$b$} (1)
+                (1) edge[above, bend left] node{$a$} (2)
+                (2) edge[below, bend left] node{$a$} (1)
+                (2) edge[loop above] node{$b$} (2)
+                (0) edge[above] node{$\lambda$} (3)
+                (3) edge[loop above] node{$a$} (3)
+                (3) edge[above, bend left] node{$b$} (4)
+                (4) edge[below, bend left] node{$b$} (3)
+                (4) edge[loop above] node{$a$} (4);
+    \end{tikzpicture}
+    \caption*{AFND que acepta las cadenas que tienen cantidad par de $a$s o cantidad par de $b$s.}
+\end{figure}
 
 Esto se puede formalizar por medio de la \textbf{relación de transición} entre configuraciones instantáneas:
 $$
