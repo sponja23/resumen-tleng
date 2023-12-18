@@ -375,6 +375,8 @@ Una \textbf{expresión regular} (o \textit{regex}) $r$ es una forma compacta de 
     \end{itemize}
 \end{itemize}
 
+El \textbf{orden de precedencia} de estos operadores es $\square^*, \square^+, \cdot, |$. Se pueden asociar de otra forma por medio de paréntesis: por ejemplo, la expresión $ab^*$ denota todas las cadenas que empiezan con $a$ y terminan en 0 o más $b$s, mientras que la expresión $(ab)^*$ denota todas las cadenas formadas por $0$ o más repeticiones de $ab$.
+
 \subsection{Equivalencia con Autómatas Finitos}
 
 Las expresiones regulares exactamente los mismos lenguajes que los autómatas finitos. Para demostrarlo, primero veamos que, dada una expresión regular, siempre se puede obtener un autómata que reconoce el mismo lenguaje.
@@ -383,7 +385,7 @@ Las expresiones regulares exactamente los mismos lenguajes que los autómatas fi
     Dada una expresión regular $r$, existe un AFND-$\lambda$ equivalente, es decir, uno para el cual $\L(r) = \L(M)$.
 \end{theorem*}
 \begin{proof}
-    La demostración será por inducción estructural sobre $r$. Además, demostraremos que siempre existe un autómata con un único estado final.
+    La demostración será por inducción estructural sobre $r$. Además, demostraremos que siempre se puede construir un autómata con un único estado final.
 
     Los casos base son:
     \begin{itemize}
@@ -420,8 +422,133 @@ Las expresiones regulares exactamente los mismos lenguajes que los autómatas fi
         La única cadena que acepta es la que tiene solamente al símbolo $a$.
     \end{itemize}
 
-    Luego, dadas dos expresiones $r$ y $s$ cuyos autómatas correspondientes son $M_r$ y $M_s$, se pueden obtener autómatas para las distintas operaciones:
+    Por otro lado, Dadas dos expresiones $r$ y $s$ cuyos autómatas correspondientes son:
     \begin{itemize}
-        \item $p = r|s$
+        \item $M_r = \langle Q_r, \Sigma, \delta_r, q_{0r}, \{q_{fr}\} \rangle$
+        \item $M_s = \langle Q_s, \Sigma, \delta_s, q_{0s}, \{q_{fs}\} \rangle$
+    \end{itemize}
+
+    Entonces se pueden obtener autómatas para cada una de las operaciones:
+    \begin{itemize}
+        \item $p = r|s$. Se toma el autómata $M_p = \langle Q_r \cup Q_s \cup \{q_{0p}, q_{fp}\}, \Sigma, \delta_p, q_{0p}, \{q_{fp}\} \rangle$, con $\delta_p$ dada por:
+        $$
+        \delta_p(q, a) :=
+        \begin{cases}
+            \delta_r(q, a) & \si q \in Q_r \setminus \{q_{fr}\} \\
+            \delta_s(q, a) & \si q \in Q_s \setminus \{q_{fs}\} \\
+            \{q_{0r}, q_{0s}\} & \si q = q_{0p} \land a = \lambda \\
+            \{q_{fp}\} & \si q \in \{q_{fr}, q_{fs}\} \land a = \lambda \\
+            \emptyset & \ecc
+        \end{cases}
+        $$
+        
+        Esto puede ser visualizado de la siguiente manera:
+        \begin{figure}[H]
+            \centering
+            \begin{tikzpicture}
+                \tikzstyle{surround} = [fill=gray!20,dotted,draw=black,rounded corners=6mm, inner sep=10pt]
+
+                \node[state, initial] (0) {$q_{0p}$};
+                \node[state, above right of=0] (1) {$q_{0r}$};
+                \node[state, below right of=0] (3) {$q_{0r}$};
+                \node[state, right of=1] (2) {$q_{fr}$};
+                \node[state, right of=3] (4) {$q_{fs}$};
+                \node[state, accepting, below right of=2] (5) {$q_{fp}$};
+
+                \draw   (0) edge[above, bend left] node{$\lambda$} (1)
+                        (0) edge[below, bend right] node{$\lambda$} (3)
+                        (1) edge[dotted] node{} (2)
+                        (3) edge[dotted] node{} (4)
+                        (2) edge[above, bend left] node{$\lambda$} (5)
+                        (4) edge[below, bend right] node{$\lambda$} (5);
+
+                \begin{pgfonlayer}{background}
+                    \node[surround] (background) [fit=(1)(2), label=$M_r$] {};
+                    \node[surround] (background) [fit=(3)(4), label=below:$M_s$] {};
+                \end{pgfonlayer}
+            \end{tikzpicture}
+        \end{figure}
+
+        Es claro que este autómata sólo acepta las cadenas que son aceptadas por $M_r$ o $M_s$.
+
+        \item $p = rs$. Se toma el autómata $M_p = \langle Q_r \cup Q_s \cup \{q_{0p}, q_{fp}\}, \Sigma, \delta_p, q_{0p}, \{q_{fp}\} \rangle$, con $\delta_p$ dada por:
+        $$
+        \delta_p(q, a) :=
+        \begin{cases}
+            \delta_r(q, a) & \si q \in Q_r \setminus \{q_{fr}\} \\
+            \delta_s(q, a) & \si q \in Q_s \setminus \{q_{fs}\} \\
+            \{q_{0r}\} & \si q = q_{0p} \land a = \lambda \\
+            \{q_{0s}\} & \si q = q_{fr} \land a = \lambda \\
+            \{q_{fp}\} & \si q = q_{fs} \land a = \lambda \\
+            \emptyset & \ecc
+        \end{cases}
+        $$
+
+        Puede ser visualizado de la siguiente manera:
+        \begin{figure}[H]
+            \centering
+            \resizebox{0.8\textwidth}{!}{
+            \begin{tikzpicture}
+                \tikzstyle{surround} = [fill=gray!20,dotted,draw=black,rounded corners=6mm, inner sep=10pt]
+
+                \node[state, initial] (0) {$q_{0p}$};
+                \node[state, right of=0] (1) {$q_{0r}$};
+                \node[state, right of=1] (2) {$q_{fr}$};
+                \node[state, right of=2] (3) {$q_{0s}$};
+                \node[state, right of=3] (4) {$q_{fs}$};
+                \node[state, right of=4, accepting] (5) {$q_{fp}$};
+
+                \draw   (0) edge[above] node{$\lambda$} (1)
+                        (1) edge[dotted] node{} (2)
+                        (2) edge[above] node{$\lambda$} (3)
+                        (3) edge[dotted] node{} (4)
+                        (4) edge[above] node{$\lambda$} (5);
+
+                \begin{pgfonlayer}{background}
+                    \node[surround] (background) [fit=(1)(2), label=$M_r$] {};
+                    \node[surround] (background) [fit=(3)(4), label=$M_s$] {};
+                \end{pgfonlayer}
+            \end{tikzpicture}
+            }
+        \end{figure}
+
+        En este caso, el autómata sólo acepta si lee una cadena que es aceptada por $M_r$, seguida por una cadena aceptada por $M_s$. Éstas son justamente las cadenas en $\L(M_r) \cdot \L(M_s)$.
+
+        \item $p = r^*$. Se toma el autómata $M_p = \langle Q_r \cup \{q_{0p}\}, \Sigma, \delta_p, q_{0p}, \{q_{0p}\} \rangle$, con $\delta_p$ dado por:
+        $$
+        \delta_p(q, a) :=
+        \begin{cases}
+            \delta_r(q, a) & \si q \in Q_r \setminus \{q_{fr}\} \\
+            \{q_{0r}\} & \si q = q_{0p} \land a = \lambda \\
+            \{q_{0r}\} & \si q = q_{fr} \land a = \lambda \\
+            \emptyset & \ecc
+        \end{cases}
+        $$
+
+        Puede ser visualizado de la siguiente manera:
+        \begin{figure}[H]
+            \centering
+            \begin{tikzpicture}
+                \tikzstyle{surround} = [fill=gray!20,dotted,draw=black,rounded corners=6mm, inner sep=10pt]
+
+                \node[state, initial, accepting] (0) {$q_{0p}$};
+                \node[state, right of=0] (1) {$q_{0r}$};
+                \node[state, right of=1] (2) {$q_{fr}$};
+
+                \draw   (0) edge[above] node{$\lambda$} (1)
+                        (1) edge[dotted] node{} (2)
+                        (2) edge[below, bend left] node{$\lambda$} (0);
+
+                \begin{pgfonlayer}{background}
+                    \node[surround] (background) [fit=(1)(2), label=$M_r$] {};
+                \end{pgfonlayer}
+            \end{tikzpicture}
+        \end{figure}
+
+        Es fácil ver que el autómata sólo acepta cadenas de la forma $w^i$ con $i \geq 0$ y $w \in \L(M_r)$, que forman el lenguaje $\L(M_r)^*$.
+
+        \item $p = r^+$. En este caso, se puede descomponer la expresión en $p = rr^*$.
     \end{itemize}
 \end{proof}
+
+La construcción realizada en la demostración se conoce como el \textbf{algoritmo de construcción de Thompson}. Para cada componente de la expresión, se agrega una cantidad constante de estados al autómata. Por ende, el autómata construido para una expresión $r$ tiene $\BigO{|r|}$ estados.
