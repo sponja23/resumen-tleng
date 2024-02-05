@@ -1,4 +1,4 @@
-\chapter{Autómatas Finitos y Expresiones Regulares}
+\chapter{Lenguajes Regulares}
 
 \section{Autómatas Finitos Determinísticos}
 \label{definicion-afds}
@@ -233,7 +233,7 @@ Un autómata finito no determinístico con transiticiones-$\lambda$ (AFND-$\lamb
                 (1) edge[above, bend left] node{$a$} (2)
                 (2) edge[below, bend left] node{$a$} (1)
                 (2) edge[loop above] node{$b$} (2)
-                (0) edge[above] node{$\lambda$} (3)
+                (0) edge[below, bend right] node{$\lambda$} (3)
                 (3) edge[loop above] node{$a$} (3)
                 (3) edge[above, bend left] node{$b$} (4)
                 (4) edge[below, bend left] node{$b$} (3)
@@ -379,7 +379,11 @@ El \textbf{orden de precedencia} de estos operadores es $\square^*, \square^+, \
 
 \subsection{Equivalencia con Autómatas Finitos}
 
-Las expresiones regulares exactamente los mismos lenguajes que los autómatas finitos. Para demostrarlo, primero veamos que, dada una expresión regular, siempre se puede obtener un autómata que reconoce el mismo lenguaje.
+Los lenguajes reconocibles por expresiones regulares exactamente los mismos lenguajes reconocibles por autómatas finitos.
+
+\subsubsection{Expresión Regular $\implies$ Autómata Finito}
+
+Primero veamos que, dada una expresión regular, siempre se puede obtener un autómata que reconoce el mismo lenguaje
 
 \begin{theorem*}
     Dada una expresión regular $r$, existe un AFND-$\lambda$ equivalente, es decir, uno para el cual $\L(r) = \L(M)$.
@@ -551,4 +555,65 @@ Las expresiones regulares exactamente los mismos lenguajes que los autómatas fi
     \end{itemize}
 \end{proof}
 
-La construcción realizada en la demostración se conoce como el \textbf{algoritmo de construcción de Thompson}. Para cada componente de la expresión, se agrega una cantidad constante de estados al autómata. Por ende, el autómata construido para una expresión $r$ tiene $\BigO{|r|}$ estados.
+La construcción realizada en la demostración se conoce como el \textbf{algoritmo de construcción de Thompson}. Para cada componente de la expresión, se agrega una cantidad constante de estados al autómata. Por ende, el autómata construido para una expresión $r$ tiene $\BigO{|r|}$ estados (y el algoritmo tiene esa misma complejidad temporal).
+
+\subsubsection{Autómata Finito $\implies$ Expresión Regular}
+
+En vez de demostrar directamente que cualquier lenguaje reconocible por autómatas finitos es también reconocible por expresiones regulares, demostraremos primero que los lenguajes de los autómatas finitos son \hyperref[lenguaje-regular]{regulares}, y luego que cualquier lenguaje regular puede ser expresado por medio de una expresión regular.
+
+\textbf{TODO}
+
+\section{Propiedades de Clausura de Lenguajes Regulares}
+
+Ahora que sabemos que los lenguajes regulares pueden ser generados por tanto expresiones regulares como autómatas finitos, podemos demostrar que esta clase de lenguajes está \textbf{cerrada} bajo ciertas operaciones, es decir, que aplicar éstas a operandos regulares resultará en otro lenguaje regular.
+
+\subsection{Concatenación}
+
+\begin{theorem*}
+    Sean $\L_1, \L_2 \subseteq \Sigma^*$ lenguajes regulares. Su concatenación $\L_1 \cdot \L_2$ es regular.
+\end{theorem*}
+\begin{proof}
+    Es trivial: sean $r_1, r_2$ expresiones regulares para $\L_1$ y $\L_2$. Entonces, la expresión $r_1 r_2$ reconoce al lenguaje $\L_1 \cdot \L_2$ y, por ende, éste es regular.
+\end{proof}
+
+\subsection{Unión}
+
+\begin{theorem*}
+    Sean $\L_1, \L_2 \subseteq \Sigma^*$ lenguajes regulares. Su unión $\L_1 \cup \L_2$ es regular.
+\end{theorem*}
+\begin{proof}
+    La demostración es análoga al caso anterior: sean $r_1, r_2$ expresiones regulares para $\L_1$ y $\L_2$. Entonces, la expresión $r_1|r_2$ reconoce al lenguaje $\L_1 \cup \L_2$ y, por ende, éste es regular.
+\end{proof}
+
+\subsection{Clausura de Kleene/Positiva}
+
+\begin{theorem*}
+    Sea $\L \subseteq \Sigma^*$ un lenguaje regular. Tanto $\L^*$ como $\L^+$ son regulares.
+\end{theorem*}
+\begin{proof}
+    Sea $r$ una expresión regular que reconoce $\L$. Entonces, $r^*$ y $r^+$ reconocen $\L^*$ y $\L^+$ respectivamente y, por ende, ambos lenguajes son regulares.
+\end{proof}
+
+\subsection{Complemento}
+
+\begin{theorem*}
+    Sea $\L \subseteq \Sigma^*$ un lenguaje regular. Su complemento $\L^c$ es regular.
+\end{theorem*}
+\begin{proof}
+    Sea $M = \langle Q, \Sigma, \delta, q_0, F \rangle$ un autómata finito tal que $\L(M) = \L$. Luego, tomemos $M' = \langle Q, \Sigma, \delta, q_0, Q \setminus F \rangle$, es decir, un autómata idéntico con los estados finales invertidos. Entonces, una cadena es aceptada por $M'$ cuando:
+    $$
+    w \in \L(M') \iff \hat \delta(q_0, w) \in Q \setminus F \iff \delta(q_0, w) \notin F \iff w \notin \L(M)
+    $$
+    Por ende, el lenguaje aceptado por $M'$ es $\L^c$, y esto implica que ese lenguaje es regular (porque se puede construir un autómata finito que lo acepta).
+\end{proof}
+
+\subsection{Intersección}
+
+\begin{theorem*}
+    Sean $\L_1, \L_2 \subseteq \Sigma^*$ lenguajes regulares. Su intersección $\L_1 \cap \L_2$ es regular.
+\end{theorem*}
+\begin{proof}
+    Según las Leyes de De Morgan, $\L_1 \cap \L_2 = \left(\L_1^c \cap \L_2^c\right)^c$. Como la clase de lenguajes regulares está cerrada por unión y complemento, este lenguaje también es regular.
+\end{proof}
+
+\subsection{Reverso}
