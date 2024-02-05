@@ -195,7 +195,7 @@ Un \textbf{autómata finito no determinístico} (AFND) $M$ es una 5-upla $\langl
 
 Este cambio requiere re-definir la \textbf{relación de transición} entre configuraciones instantáneas $\vdash_M$ (ésta deja de ser una función):
 $$
-(q, w \cdot a) \vdash_M (r, w) \iff r \in \delta(q, a)
+(q, a \cdot w) \vdash_M (r, w) \iff r \in \delta(q, a)
 $$
 
 La relación de transición cumple las mismas \hyperref[subsubsec-propiedades-rel-transicion]{propiedades} que las del caso determinístico (excepto por la de determinismo, obviamente).
@@ -244,7 +244,7 @@ Un autómata finito no determinístico con transiticiones-$\lambda$ (AFND-$\lamb
 
 Esto se puede formalizar por medio de la \textbf{relación de transición} entre configuraciones instantáneas:
 $$
-(q, w) \vdash_M (r, w') \iff (w = w' \cdot a \land r \in \delta(q, a)) \lor (w = w' \land r \in \delta(q, \lambda))
+(q, w) \vdash_M (r, w') \iff (w = a \cdot w' \land r \in \delta(q, a)) \lor (w = w' \land r \in \delta(q, \lambda))
 $$
 
 Esta modificación hace que deje de valer la \hyperref[subsubsec-propiedades-rel-transicion]{propiedad de linealidad}.
