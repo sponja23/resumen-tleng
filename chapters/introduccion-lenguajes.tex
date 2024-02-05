@@ -173,13 +173,13 @@ Los \textbf{lenguajes regulares} son aquellos que son generados por las gramáti
 $$
 \begin{aligned}
     A & \to b \\
-    A & \to b A \\
+    A & \to b B \\
     A & \to \lambda
 \end{aligned}
 $$
-Donde $A \in V_N, b \in V_T$.
+Donde $A, B \in V_N, b \in V_T$.
 
-Las gramáticas que cumplen dichas reglas se denominan \textbf{regulares a derecha}: si, en lugar de permitir $A \to b A$, se permiten las producciones $A \to A b$, se obtienen las gramáticas \textbf{regulares a izquierda}. Ambos tipos de gramática son capaces de expresar cualquier lenguaje regular (y por ende tienen el mismo poder expresivo).
+Las gramáticas que cumplen dichas reglas se denominan \textbf{regulares a derecha}: si, en lugar de permitir $A \to b B$, se permiten las producciones $A \to B b$, se obtienen las gramáticas \textbf{regulares a izquierda}. Ambos tipos de gramática son capaces de expresar cualquier lenguaje regular (y por ende tienen el mismo poder expresivo).
 
 % TODO: Referencia
 Como se explica \textbf{más adelante}, estos son exactamente los lenguajes que se pueden reconocer por autómatas finitos.
