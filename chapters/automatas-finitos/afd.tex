@@ -63,7 +63,7 @@ La relación de transición $\vdash$ cumple las siguientes propiedades:
      &  & (q, \alpha) \vdash^* (r, \lambda) \land (r, \beta) \vdash^* (p, \lambda)  & \implies (q, \alpha \cdot \beta) \vdash^* (p, \lambda)                                                 &  & \textbf{(Concatenación)}             \\
      &  & (q, \alpha \cdot \beta) \vdash^* (p, \lambda)                             & \implies \exists r \in Q \mid (q, \alpha) \vdash^* (r, \lambda) \land (r, \beta) \vdash^* (p, \lambda) &  & \textbf{(Siempre toma algún estado)} \\
      &  & (q, \alpha) \vdash^n (r, \lambda)                                         & \iff |\alpha| = n                                                                                      &  & \textbf{(Linealidad)}                \\
-     &  & (q, \alpha) \vdash^* (q, \lambda)                                         & \implies \forall i \in \N,\ (q, \alpha^i) \vdash (q, \lambda)                                          &  & \textbf{(Invarianza)}
+     &  & (q, \alpha) \vdash^* (q, \lambda)                                         & \implies \forall i \in \N,\ (q, \alpha^i) \vdash^* (q, \lambda)                                          &  & \textbf{(Invarianza)}
 \end{flalign*}
 
 \subsection{Función de Transición Extendida}
