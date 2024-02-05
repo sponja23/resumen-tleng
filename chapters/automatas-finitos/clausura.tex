@@ -1,0 +1,120 @@
+\section{Propiedades de Clausura de Lenguajes Regulares}
+
+Ahora que sabemos que los lenguajes regulares pueden ser generados por tanto expresiones regulares como autómatas finitos, podemos demostrar que esta clase de lenguajes está \textbf{cerrada} bajo ciertas operaciones, es decir, que aplicar éstas a operandos regulares resultará en otro lenguaje regular.
+
+\subsection{Concatenación}
+
+\begin{theorem*}
+    Sean $\L_1, \L_2 \subseteq \Sigma^*$ lenguajes regulares. Su concatenación $\L_1 \cdot \L_2$ es regular.
+\end{theorem*}
+\begin{proof}
+    Es trivial: sean $r_1, r_2$ expresiones regulares para $\L_1$ y $\L_2$. Entonces, la expresión $r_1 r_2$ reconoce al lenguaje $\L_1 \cdot \L_2$ y, por ende, éste es regular.
+\end{proof}
+
+\subsection{Unión}
+
+\begin{theorem*}
+    Sean $\L_1, \L_2 \subseteq \Sigma^*$ lenguajes regulares. Su unión $\L_1 \cup \L_2$ es regular.
+\end{theorem*}
+\begin{proof}
+    La demostración es análoga al caso anterior: sean $r_1, r_2$ expresiones regulares para $\L_1$ y $\L_2$. Entonces, la expresión $r_1|r_2$ reconoce al lenguaje $\L_1 \cup \L_2$ y, por ende, éste es regular.
+\end{proof}
+
+\subsection{Clausura de Kleene/Positiva}
+
+\begin{theorem*}
+    Sea $\L \subseteq \Sigma^*$ un lenguaje regular. Tanto $\L^*$ como $\L^+$ son regulares.
+\end{theorem*}
+\begin{proof}
+    Sea $r$ una expresión regular que reconoce $\L$. Entonces, $r^*$ y $r^+$ reconocen $\L^*$ y $\L^+$ respectivamente y, por ende, ambos lenguajes son regulares.
+\end{proof}
+
+\subsection{Complemento}
+
+\begin{theorem*}
+    Sea $\L \subseteq \Sigma^*$ un lenguaje regular. Su complemento $\L^c$ es regular.
+\end{theorem*}
+\begin{proof}
+    Sea $M = \langle Q, \Sigma, \delta, q_0, F \rangle$ un autómata finito tal que $\L(M) = \L$. Luego, tomemos $M' = \langle Q, \Sigma, \delta, q_0, Q \setminus F \rangle$, es decir, un autómata idéntico con los estados finales invertidos. Entonces, una cadena es aceptada por $M'$ cuando:
+    $$
+        w \in \L(M') \iff \hat \delta(q_0, w) \in Q \setminus F \iff \delta(q_0, w) \notin F \iff w \notin \L(M)
+    $$
+    Por ende, el lenguaje aceptado por $M'$ es $\L^c$, y esto implica que ese lenguaje es regular (porque se puede construir un autómata finito que lo acepta).
+\end{proof}
+
+\subsection{Intersección}
+
+\begin{theorem*}
+    Sean $\L_1, \L_2 \subseteq \Sigma^*$ lenguajes regulares. Su intersección $\L_1 \cap \L_2$ es regular.
+\end{theorem*}
+\begin{proof}
+    Según las Leyes de De Morgan, $\L_1 \cap \L_2 = \left(\L_1^c \cap \L_2^c\right)^c$. Como la clase de lenguajes regulares está cerrada por unión y complemento, este lenguaje también es regular.
+\end{proof}
+
+\subsection{Reverso}
+
+\begin{theorem*}
+    Sea $\L \subseteq \Sigma^*$ un lenguaje regular. Su reverso $\L^r$ es regular.
+\end{theorem*}
+\begin{proof}
+    Tomemos un autómata finito determinístico $M = \langle Q, \Sigma, \delta, q_0, F \rangle$ tal que $\L(M) = \L$. Luego, construyamos el autómata no determinístico $M' = \langle Q', \Sigma, \delta', q_0', F' \rangle$, donde:
+    \begin{itemize}
+        \item El conjunto de estados es $Q' := Q \cup \{q_0'\}$, es decir, se agrega un nuevo estado $q_0'$.
+        \item La función de transición está dada por:
+              $$
+                  \delta'(q, a) :=
+                  \begin{cases}
+                      \{r \mid \delta(r, a) = q\} & \si q \neq q_0'                \\
+                      F                           & \si q = q_0' \land a = \lambda
+                  \end{cases}
+              $$
+              Es decir, se \textbf{revierten} todas las transiciones de los estados originales, mientras que el nuevo estado está conectado mediante transiciones lambda con todos los estados finales anteriores.
+        \item El estado inicial es el nuevo estado $q_0'$.
+        \item El conjunto de estados finales es $F' = \{q_0\}$, es decir, tiene sólo al estado inicial original.
+    \end{itemize}
+
+    Luego, veamos que la relación de transición del nuevo autómata cumple $(q, w) \vdash_{M'}^* (r, \lambda) \iff (r, w^r) \vdash_M^* (q, \lambda)$ para los estados originales $q, r \in Q$. La demostración será por inducción en la longitud de $w$:
+    \begin{itemize}
+        \item \textbf{Caso Base}: Si $|w| = 0$, entonces $w = \lambda$. Como $M'$ no tiene ninguna transición lambda entre los estados originales, la única forma de que se cumpla $(q, \lambda) \vdash_{M'}^* (r, \lambda)$ es que $q = r$ y, por ende, también se cumple $(r, \lambda^r) = (r, \lambda) \vdash_M^* (q, \lambda)$. Lo mismo vale para la implicación inversa: el autómata original no tiene transiciones lambda porque es determinístico.
+        \item \textbf{Paso Inductivo}: Si $|w| > 0$, entonces $w = a \cdot w'$. Por hipótesis inductiva, sabemos que $(q, w') \vdash_{M'}^* (r, \lambda) \iff (r, w'^r) \vdash_M^* (q, \lambda)$ para cualquier par de estados originales $q, r \in Q$. Demostremos que $(q, a \cdot w') \vdash_{M'}^* (r, \lambda) \iff (r, w'^r \cdot a) \vdash_M^* (q, \lambda)$.
+              \begin{itemize}
+                  \item $\implies$) Si $(q, a \cdot w') \vdash_{M'}^* (r, \lambda)$ entonces, por la \hyperref[subsubsec-propiedades-rel-transicion]{propiedad de la relación de transición} de siempre tomar algún estado, sabemos que existe algún estado $s \in Q$ tal que:
+                        $$
+                            (q, a) \vdash_{M'}^* (s, \lambda) \land (s, w') \vdash_{M'}^* (r, \lambda)
+                        $$
+                        Como el autómata no tiene transiciones lambda entre los estados originales, $(q, a) \vdash_{M'}^* (s, \lambda)$ sólo puede valer cuando $(q, a) \vdash_{M'} (s, \lambda)$, y esto a su vez implica que $s \in \delta'(q, a)$. Por la definición de $\delta'$, tenemos que $s \in \delta'(q, a) \implies \delta(s, a) = q \implies (s, a) \vdash_M (q, \lambda)$. Por otro lado, la hipótesis inductiva garantiza que $(s, w') \vdash_{M'}^* (r, \lambda)$ implica $(r, w'^r) \vdash_M^* (s, \lambda)$.
+
+                        Por la propiedad de concatenación de la relación de transición, se tiene que:
+                        $$
+                            (r, w'^r) \vdash_M^* (s, \lambda) \land (s, a) \vdash_M^* (q, \lambda) \implies (r, w'^r \cdot a) \vdash_M^* (q, \lambda)
+                        $$
+                  \item $\impliedby$) La demostración es análoga: asumiendo $(r, w'^r \cdot a) \vdash_M^* (q, \lambda)$, podemos usar la propiedad de existencia de estados intermedios para obtener un estado $s \in Q$ tal que:
+                        $$
+                            (r, w'^r) \vdash_M^* (s, \lambda) \land (s, a) \vdash_M^* (q, \lambda)
+                        $$
+                        Nuevamente, sabemos que $(s, a) \vdash_M^* (q, \lambda) \implies (s, a) \vdash_M (q, \lambda) \implies \delta(s, a) = q$ y, por la definición de $\delta'$, esto implica que $s \in \delta'(q, a) \iff (q, a) \vdash_{M'} (s, \lambda)$. Por otro lado, la hipótesis inductiva implica que $(r, w'^r) \vdash_M^* (s, \lambda) \implies (s, w') \vdash_{M'} (r, \lambda)$.
+
+                        Por la propiedad de concatenación de la relación de transición, se tiene que:
+                        $$
+                            (q, a) \vdash_{M'}^* (s, \lambda) \land (s, w') \vdash_{M'}^* (r, \lambda) \implies (q, a \cdot w') \vdash_{M'}^* (r, \lambda)
+                        $$
+              \end{itemize}
+    \end{itemize}
+
+    Ahora que sabemos que $(q, w) \vdash_{M'}^* (r, \lambda) \iff (r, w^r) \vdash_M^* (q, \lambda)$ para estados originales $q, r \in Q$, analicemos las cadenas aceptadas por $M'$:
+    $$
+        w \in \L(M') \iff (q_0', w) \vdash_{M'}^* (q_0, \lambda)
+    $$
+    El único estado final es $q_0$, así que la ejecución del autómata debe terminar en ese estado. Por otro lado, las únicas transiciones salientes de $q_0'$ son las transiciones lambda hacia los estados finales, así que se tiene:
+    $$
+        (q_0', w) \vdash_{M'}^* (q_0, \lambda) \iff \exists q_f \in F \mid (q_f, w) \vdash_{M'}^* (q_0, \lambda)
+    $$
+    Entonces, por la propiedad demostrada anteriormente, se tiene que:
+    $$
+    \begin{aligned}        
+        w \in \L(M') & \iff \exists q_f \in F \mid (q_f, w) \vdash_{M'}^* (q_0, \lambda) \\
+        & \iff \exists q_f \in F \mid (q_0, w^r) \vdash_{M}^* (q_f, \lambda) \iff w^r \in \L(M)
+    \end{aligned}
+    $$
+    Es decir, $\L(M') = {w^r \mid w \in \L(M)} = (\L(M))^r = \L^r$, y por ende, $\L^r$ es regular.
+\end{proof}

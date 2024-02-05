@@ -1,0 +1,183 @@
+\section{Autómatas Finitos No Determinísticos}
+
+Un \textbf{autómata finito no determinístico} (AFND) $M$ es una 5-upla $\langle Q, \Sigma, \delta, q_0, F \rangle$. Sus componentes tienen la misma semántica que para los AFDs, pero en este caso se tiene $\delta : Q \times \Sigma \to \mathcal P (Q)$, es decir, el codominio de $\delta$ son los subconjuntos de $Q$. Esto es porque, cuando el autómata está en el estado $q$ y lee el símbolo $a$, es capaz tomar alguna de varias transiciones posibles.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+        \node[state, initial] (0) {$q_0$};
+        \node[state, right of=0] (1) {$q_1$};
+        \node[state, accepting, right of=1] (2) {$q_2$};
+
+        \draw   (0) edge[above, loop above] node{$a,b$} (0)
+        (0) edge[above] node{$a$} (1)
+        (1) edge[above] node{$b$} (2);
+    \end{tikzpicture}
+    \caption*{AFND que acepta cualquier cadena que termina en $ab$. \\ Se puede ver que $\delta(q_0, a) = \{q_0, q_1\}$.}
+\end{figure}
+
+Este cambio requiere re-definir la \textbf{relación de transición} entre configuraciones instantáneas $\vdash_M$ (ésta deja de ser una función):
+$$
+    (q, a \cdot w) \vdash_M (r, w) \iff r \in \delta(q, a)
+$$
+
+La relación de transición cumple las mismas \hyperref[subsubsec-propiedades-rel-transicion]{propiedades} que las del caso determinístico (excepto por la de determinismo, obviamente).
+
+También se debe volver a definir la \textbf{función de transición extendida} $\hat \delta : Q \times \Sigma^* \to \mathcal P (Q)$:
+$$
+    \begin{aligned}
+        \hat \delta(q, \lambda)   & := \{q\}                                                                                                                    \\
+        \hat \delta(q, w \cdot a) & := \{p \in Q \mid \exists r \in \hat \delta (q, w) : p \in \delta (r, a)\} = \bigcup_{r \in \hat \delta(q, w)} \delta(r, a)
+    \end{aligned}
+$$
+
+El lenguaje aceptado por el autómata $M$ es el conjunto de cadenas en las que \textbf{alguno} de todos los posibles caminos de ejecución termina en un estado final. Es decir,
+$$
+    w \in \L(M) \iff \hat \delta(q_0, w) \cap F \neq \emptyset \iff \exists q_f \in F \mid (q_0, w) \vdash_M^* (q_f, \lambda)
+$$
+
+Notemos que esta definición automáticamente permite tener autómatas incompletos: basta con tomar $\delta(q, a) = \emptyset$.
+
+\subsection{Transiciones Lambda}
+
+Un autómata finito no determinístico con transiticiones-$\lambda$ (AFND-$\lambda$) es uno en el cual la función de transición es de la forma $delta : Q \times (\Sigma \cup \{\lambda\}) \to \mathcal P (Q)$. Se agrega un ``símbolo'' $\lambda$ que se puede tomar \textbf{sin consumir ningún símbolo} de la entrada.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+        \node[state, initial] (0) {$q_0$};
+        \node[state, accepting, above right of=0] (1) {$q_1$};
+        \node[state, right of=1] (2) {$q_2$};
+        \node[state, accepting, below right of=0] (3) {$q_1$};
+        \node[state, right of=3] (4) {$q_2$};
+
+        \draw   (0) edge[above, bend left] node{$\lambda$} (1)
+        (1) edge[loop above] node{$b$} (1)
+        (1) edge[above, bend left] node{$a$} (2)
+        (2) edge[below, bend left] node{$a$} (1)
+        (2) edge[loop above] node{$b$} (2)
+        (0) edge[below, bend right] node{$\lambda$} (3)
+        (3) edge[loop above] node{$a$} (3)
+        (3) edge[above, bend left] node{$b$} (4)
+        (4) edge[below, bend left] node{$b$} (3)
+        (4) edge[loop above] node{$a$} (4);
+    \end{tikzpicture}
+    \caption*{AFND que acepta las cadenas que tienen cantidad par de $a$s o cantidad par de $b$s.}
+\end{figure}
+
+Esto se puede formalizar por medio de la \textbf{relación de transición} entre configuraciones instantáneas:
+$$
+    (q, w) \vdash_M (r, w') \iff (w = a \cdot w' \land r \in \delta(q, a)) \lor (w = w' \land r \in \delta(q, \lambda))
+$$
+
+Esta modificación hace que deje de valer la \hyperref[subsubsec-propiedades-rel-transicion]{propiedad de linealidad}.
+
+Para definir la función de transición extendida, primero conviene introducir la \textbf{clausura lambda}: $Cl_\lambda(q)$ es el conjunto de estados que son alcanzables desde $q$ por medio de transiciones-$\lambda$. Si se define la relación:
+$$q \sim_\lambda r \iff r \in \delta(q, \lambda)$$
+Entonces $r \in Cl_\lambda(q) \iff q \sim_\lambda^* r$. También se puede extender la definición para considerar conjuntos de estados: $Cl_\lambda(S) := \bigcup_{q \in S} Cl_\lambda(q)$.
+
+La \textbf{función de transición extendida} $\hat \delta : Q \times (\Sigma \cup \{\lambda\}) \to \mathcal P (Q)$ pasa a ser:
+$$
+    \begin{aligned}
+        \hat \delta (q, \lambda)   & := Cl_\lambda(q)                                                          \\
+        \hat \delta (q, w \cdot a) & := Cl_\lambda\left(\bigcup_{r \in \hat \delta(q, w)} \delta(r, a) \right)
+    \end{aligned}
+$$
+
+\subsubsection{Equivalencia con AFNDs}
+
+Obviamente, cualquier AFND puede ser interpretado como un AFND-$\lambda$. Lo sorprendente es que esto también vale para el otro lado: resulta que agregar transiciones-$\lambda$ no aumenta el poder expresivo de los AFNDs.
+
+\begin{theorem*}
+    Dado un AFND-$\lambda$ $M = \langle Q, \Sigma, \delta, q_0, F \rangle$, existe un AFND sin transiciones lambda equivalente.
+\end{theorem*}
+\begin{proof}
+    Hay igual que antes, la demostración es constructiva: exhibimos un autómata $M' = \langle Q, \Sigma, \delta', q_0, F' \rangle$ que cumple $\L(M) = \L(M')$. El conjunto de estados y el estado inicial son los mismos, pero la función de transición y el conjunto de estados finales se reemplazan por:
+    $$
+        \begin{aligned}
+            \delta'(q, a) & := \hat \delta (q, a) = Cl_\lambda\left(\bigcup_{r \in Cl_\lambda(q)} \delta(r, a)\right) \\
+            F'            & := \begin{cases}
+                                   F              & \si Cl_\lambda (q_0) \cap F = \emptyset \\
+                                   F \cup \{q_0\} & \ecc
+                               \end{cases}
+        \end{aligned}
+    $$
+    En tal caso, la función de transición extendida del nuevo autómata es:
+    $$
+        \begin{aligned}
+            \hat \delta'(q, \lambda)   & := \{q\}                                              \\
+            \hat \delta'(q, w \cdot a) & := \bigcup_{r \in \hat \delta'(q, w)} \delta'(r, a) =
+        \end{aligned}
+    $$
+    Veamos que $\hat \delta'(q, w) = \hat \delta(q, w) \ \forall w \in \Sigma^+$ por inducción en la longitud de las cadenas:
+    \begin{itemize}
+        \item Cuando $|w| = 1$, se tiene $w = a \in \Sigma$, y luego:
+              $$
+                  \hat \delta'(q, \lambda \cdot a)
+                  = \bigcup_{r \in \underbrace{\hat \delta'(q, \lambda)}_{\{q\}} } \delta'(r, a)
+                  = \delta'(q, a) = \hat \delta(q, a)
+              $$
+        \item Suponiendo que vale para cualquier cadena de longitud $n$, y siendo $w$ una de esas cadenas:
+              $$
+                  \begin{aligned}
+                      \hat \delta'(q, w \cdot a)
+                       & = \bigcup_{r \in \hat \delta'(q, w)} \delta'(r, a)
+                      \overset{HI}{=} \bigcup_{r \in \hat \delta(q, w)} \delta'(r, a)
+                      = \bigcup_{r \in \hat \delta(q, w)} \hat \delta(r, a)                                                                                                                                                                                              \\
+                       & = \bigcup_{r \in \hat \delta(q, w)} Cl_\lambda\left(\bigcup_{r' \in Cl_\lambda(r)} \delta(r', a)\right) = \bigcup_{r \in \hat \delta(q, w)} \bigcup_{r' \in \underbrace{Cl_\lambda(r)}_{\subseteq \hat \delta(q, w)}} Cl_\lambda(\delta(r', a)) \\
+                       & = \bigcup_{r \in \hat \delta(q, w)} Cl_\lambda(\delta(r, a)) = Cl_\lambda\left(\bigcup_{r \in \hat \delta(q, w)} \delta(r, a)\right) = \hat \delta (q, w \cdot a)
+                  \end{aligned}
+              $$
+    \end{itemize}
+
+    Esto implica que, para cualquier cadena $w \in \Sigma^+$, se tiene:
+    $$w \in \L(M) \iff \hat \delta(q_0, w) \in F \iff \hat \delta'(q_0, w) \cap F \neq \emptyset$$
+
+    Entonces:
+    \begin{itemize}
+        \item Si $w \in \L(M)$ y $\hat \delta'(q_0, w) \cap F \neq \emptyset$, como $F \subseteq F'$, $\hat \delta'(q_0, w) \cap F' \neq \emptyset \implies w \in \L(M')$.
+        \item Si $w \notin \L(M)$ y $\hat \delta'(q_0, w) \cap F = \emptyset$, la única forma de que $\hat \delta'(q_0, w) \cap F' \neq \emptyset$ es que $q_0 \in F' \cap \hat \delta'(q_0, w)$. Sin embargo, cuando vale $q_0 \in F'$ es porque $Cl_\lambda(q_0) \cap F \neq \emptyset$, lo cual implica que existe alguna secuencia de transiciones lambda de la forma:
+              $$(q_0, \lambda) \vdash_M \dots \vdash (q_f, \lambda)$$
+              Con $q_f \in F'$. Como $q_0 \in \hat \delta'(q_0, w)$, también vale que $(q_0, w) \vdash^* (q_0, \lambda)$. Por ende, se tiene:
+              $$(q_0, w) \vdash_M^* (q_0, \lambda) \vdash_M^* (q_f, \lambda) \implies w \in \L(M)$$
+              Pero, por hipótesis, $w \notin \L(M)$. Llegamos a un \textbf{absurdo}, que vino de suponer que $\hat \delta'(q_0, w) \cap F' \neq \emptyset$. Por ende, $\hat \delta'(q_0, w) \cap F' = \emptyset \implies w \notin \L(M')$.
+    \end{itemize}
+
+    En ambos casos, se tiene:
+    $$w \in \L(M) \iff w \in \L(M')$$
+\end{proof}
+
+La construcción realizada en la demostración puede ser adaptada fácilmente a un algoritmo que elimina las transiciones lambda de un autómata dado. Una implementación \textit{naïve}, que recorre todos los estados y explora las clausuras lambda correspondientes, tendría una complejidad temporal acotada por $\BigO{|Q|^2}$.
+
+\subsection{Equivalencia con AFDs}
+
+Es fácil ver que a partir de un AFD $M$ se puede construir un AFND $M'$ equivalente tomando $\delta'(q, a) = \{\delta(q, a)\}$. A continuación, veremos que a partir de un AFND se puede construir un AFD equivalente:
+
+\begin{theorem*}
+    Dado un AFND $M = \langle Q, \Sigma, \delta, q_0, F \rangle$, existe un AFD $M'$ tal que $\L(M) = \L(M')$.
+\end{theorem*}
+\begin{proof}
+    Nuevamente, la demostración será constructiva: tomamos $M' = \langle Q', \Sigma, \delta', q_0', F' \rangle$, donde
+    \begin{itemize}
+        \item $Q' = \mathcal P (Q)$.
+        \item $F' = \{S \in Q' \mid S \cap F \neq 0\}$.
+        \item $q_0' = \{q_0\}$
+        \item $\delta'(S, a) = \bigcup_{q \in S} \delta(q, a)$
+    \end{itemize}
+
+    Antes de demostrar que este autómata es equivalente, veamos que, para cualquier cadena $w \in \Sigma^*$,
+    $$\hat \delta'(q_0', w) = \hat \delta(q_0, w)$$
+
+    La demostración será por inducción en $|w|$:
+    \begin{itemize}
+        \item Si $|w| = 0 \iff w = \lambda$, se tiene:
+              $$\hat \delta'(q_0', \lambda) = q_0' = \{q_0\} = \hat \delta(q_0, \lambda)$$
+        \item Si vale para $w$ con $|w| = n$,
+              $$\hat \delta'(q_0', w \cdot a) = \delta'(\hat \delta(q_0', w), a) = \bigcup_{q \in \hat \delta'(q_0', w)} \delta(q, a) \overset{HI}{=} \bigcup_{q \in \hat \delta(q_0, w)} \delta(q, a) = \hat \delta(q_0, w \cdot a)$$
+    \end{itemize}
+
+    Teniendo este resultado, la demostración de equivalencia es bastante directa:
+    $$w \in \L(M) \iff \hat \delta(q_0, w) \cap F \neq \emptyset \iff \hat \delta'(q_0', w) \cap F \neq \emptyset \iff \hat \delta'(q_0', w) \in F' \iff w \in \L(M')$$
+\end{proof}
+
+Al igual que en los casos anteriores, esta demostración se puede adaptar a un algoritmo que \textbf{determiniza} un AFND. Sin embargo, a diferencia de las equivalencias anteiores, este procedimiento es más costoso: el nuevo AFD tiene $2^{|Q|}$ estados\footnote{La cantidad de estados se puede disminuir si se descartan los \textbf{estados inaccesibles} (aquellos para los que no hay un camino desde $q_0$). Aún así, es posible que el autómata quede con $\BigO{2^{|Q|}}$ estados.}.

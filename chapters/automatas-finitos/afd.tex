@@ -1,0 +1,174 @@
+\section{Autómatas Finitos Determinísticos}
+\label{definicion-afds}
+
+Un \textbf{autómata finito determinístico} (AFD) $M$ es una 5-upla $\langle Q, \Sigma, \delta, q_0, F \rangle$ donde:
+\begin{itemize}
+    \item $Q$ es el conjunto finito de \textbf{estados del autómata}.
+    \item $\Sigma$ es el \textbf{alfabeto de entrada}.
+    \item $\delta: Q \times \Sigma \to Q$ es la \textbf{función de transición}: si el autómata se encuentra en el estado $q \in Q$ y lee el símbolo $a \in \Sigma$ de la entrada, pasa al estado $\delta(q, a)$.
+    \item $q_0 \in Q$ es el \textbf{estado inicial}.
+    \item $F \subseteq Q$ es el conjunto de \textbf{estados finales}/\textbf{estados de aceptación}.
+\end{itemize}
+
+
+Estos autómatas toman una cadena de entrada $w \in \Sigma^*$ e iteran por los símbolos de la misma. Empezando en el estado inicial, cada símbolo indica el siguiente estado a tomar. Si, al terminar de leer la entrada, el autómata se encuentra en un estado final, la cadena es \textbf{aceptada}. De lo contrario, es \textbf{rechazada}.
+
+\subsubsection{Visualización}
+
+Estos autómatas se suelen representar como \textbf{grafos} $G = \langle V, E \rangle$, donde:
+\begin{itemize}
+    \item Los \textbf{nodos} representan los estados del autómata ($V = Q$).
+    \item Las \textbf{aristas} están dadas por la función de transición: $(v, w) \in E \iff \exists a \in \Sigma \mid \delta(v, a) = w$. Además, las aristas se etiquetan con los símbolos por los cuales se puede tomar la transición.
+    \item El estado inicial se representa con una arista entrante que no viene de otro estado.
+    \item Los estados finales se respresentan con doble borde.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+        \node[state, initial] (0) {$q_0$};
+        \node[state, accepting, right of=0] (1) {$q_1$};
+        \node[state, below right of=0] (2) {$q_2$};
+
+        \draw   (0) edge[above] node{$a$} (1)
+        (0) edge[above] node{$b$} (2)
+        (1) edge[below, bend left, right=0.3] node{$a,b$} (2)
+        (2) edge[above, bend left, left=0.3] node{$b$} (1)
+        (2) edge[loop right] node{$a$} (2);
+    \end{tikzpicture}
+    \caption*{Visualización del autómata $M = \langle \{q_0, q_1, q_2\}, \{a, b\}, \delta, q_0, \{q_1\} \rangle$, donde la función de transición $\delta$ está dada por las flechas entre los estados.}
+\end{figure}
+
+\subsection{Configuraciones Instantáneas}
+
+La ejecución de los AFDs se puede formalizar usando el concepto de las \textbf{configuraciones instantáneas}: $\langle q, s \rangle \in Q \times \Sigma^*$ representa el punto de la ejecución del autómata en el que se encuentra en el estado $q$ y tiene a $s$ como entrada restante.
+
+La función de transición $\delta$ de un autómata $M$ se puede adaptar a una relación entre configuraciones instantáneas, la \textbf{relación de transición} $\vdash_M$:
+$$
+    (q, a \cdot w) \vdash_M (r, w) \iff \delta(q, a) = r
+$$
+
+Luego, el \textbf{lenguaje aceptado} por el autómata $M$, denotado $\L(M)$ se puede definir como:
+$$
+    \L(M) := \{ w \in \Sigma^* \mid \exists q_f \in F : (q_0, w) \vdash_M^* (q_f, \lambda) \}
+$$
+
+\subsubsection{Propiedades}
+\label{subsubsec-propiedades-rel-transicion}
+
+La relación de transición $\vdash$ cumple las siguientes propiedades:
+
+\begin{flalign*}
+     &  & (q, \alpha) \vdash^* (r, \lambda) \land (q, \alpha) \vdash^* (s, \lambda) & \implies r = s                                                                                         &  & \textbf{(Determinismo)}              \\
+     &  & (q, \alpha) \vdash^* (r, \lambda) \land (r, \beta) \vdash^* (p, \lambda)  & \implies (q, \alpha \cdot \beta) \vdash^* (p, \lambda)                                                 &  & \textbf{(Concatenación)}             \\
+     &  & (q, \alpha \cdot \beta) \vdash^* (p, \lambda)                             & \implies \exists r \in Q \mid (q, \alpha) \vdash^* (r, \lambda) \land (r, \beta) \vdash^* (p, \lambda) &  & \textbf{(Siempre toma algún estado)} \\
+     &  & (q, \alpha) \vdash^n (r, \lambda)                                         & \iff |\alpha| = n                                                                                      &  & \textbf{(Linealidad)}                \\
+     &  & (q, \alpha) \vdash^* (q, \lambda)                                         & \implies \forall i \in \N,\ (q, \alpha^i) \vdash (q, \lambda)                                          &  & \textbf{(Invarianza)}
+\end{flalign*}
+
+\subsection{Función de Transición Extendida}
+
+Una forma alternativa (y análoga) de dar el lenguaje aceptado es por medio de la \textbf{función de transición extendida}. Esta es una función $\hat \delta : Q \times \Sigma^* \to \mathcal P (Q)$ (toma cadenas en vez de símbolos) definida de la siguiente manera:
+$$
+    \begin{aligned}
+        \hat \delta(q, \lambda)   & := q                              \\
+        \hat \delta(q, w \cdot a) & := \delta (\hat \delta (q, w), a)
+    \end{aligned}
+$$
+Donde $q \in Q, a \in \Sigma, w \in \Sigma^*$.
+
+Bajo esta definición el lenguaje aceptado por un autómata $M$ es simplemente:
+$$
+    \L (M) := \{w \in \Sigma^* \mid \hat \delta (q_0, w) \in F \}
+$$
+
+\subsubsection{Propiedades}
+
+La función de transición extendida cumple propiedades similares a las de la relación de transición:
+\begin{flalign*}
+     &  & \hat \delta(q, \alpha \cdot \beta) & = \hat \delta(\hat \delta(q, \alpha), \beta)             &  & \textbf{(Concatenación)} \\
+     &  & \hat \delta(q, \alpha) = q         & \implies \forall i \in \N,\ \hat \delta(q, \alpha^i) = q &  & \textbf{(Invarianza)}
+\end{flalign*}
+
+\subsection{Autómatas Incompletos}
+
+Según la \hyperref[definicion-afds]{definición anterior}, la función de transición $\delta$ debe definir un estado siguiente para cada combinación de estados y símbolos. Sin embargo, a veces resulta cómodo tener estados en los cuales recibir ciertos símbolos cause un rechazo inmediato de la cadena. Una forma de lograr eso es permitir que $\delta$ sea una \textbf{función parcial}, es decir, que se indefina para ciertas entradas. Un autómata cuya función de transición es parcial se denomina \textbf{incompleto}.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+        \node[state, initial] (0) {$q_0$};
+        \node[state, right of=0] (1) {$q_1$};
+        \node[state, accepting, right of=1] (2) {$q_2$};
+
+        \draw   (0) edge[above] node{$a$} (1)
+        (1) edge[above] node{$b$} (2);
+    \end{tikzpicture}
+    \caption*{Autómata incompleto que solamente acepta la cadena $ab$.}
+\end{figure}
+
+No obstante, la distinción entre autómatas completos e incompletos no es muy importante gracias al siguiente teorema:
+
+\begin{theorem*}
+    Para cualquier autómata incompleto $M$, existe un autómata completo $M'$ equivalente, es decir, $\L(M) = \L(M')$.
+\end{theorem*}
+\begin{proof}
+    Si $M = \langle Q, \Sigma, \delta, q_0, F \rangle$, basta con tomar el autómata $M' = \langle Q \cup \{q_T\}, \Sigma, \delta', q_0, F \rangle$, donde $q_T$ es un nuevo estado, llamado \textbf{estado trampa}. La función de transición se extiende de la siguiente manera:
+    $$
+        \delta' (q, a) :=
+        \begin{cases}
+            \delta(q, a) & \si q \in Q \land \delta(q, a) \neq \indef \\
+            q_T          & \si q = q_T \lor \delta(q, a) = \indef
+        \end{cases}
+    $$
+    Veamos que $\L(M) = \L(M')$, demostrando $w \in \L(M) \iff w \in \L(M')$.
+
+    $\implies$) Si $w \in \L(M)$, el autómata debe pasar por una serie de \textbf{transiciones definidas}, hasta llegar a un estado final. Luego, por la definición de $\delta'$, las transiciones entre esos estados son las mismas en $M'$, así que se llega al mismo estado, y por ende $w \in \L(M')$. Formalmente,
+    $$
+        \begin{aligned}
+            a_1 \dots a_k \in \L(M) \implies & \exists q_f \in F : (q_0, a_1 \dots a_k) \vdash_M^* (q_f, \lambda)                                                         \\
+            \iff                             & \exists q_1, \dots, q_k \in Q : (q_0, a_1 \dots a_k) \vdash_M (q_1, a_2 \dots a_k) \vdash_M \cdots \vdash_M (q_k, \lambda) \\
+                                             & \land q_k \in F
+        \end{aligned}
+    $$
+    Tomando la secuencia de estados $q_0, q_1 \dots q_k$, se tiene:
+    $$
+        \begin{aligned}
+             & (q_i, a_{i+1} \dots a_k) \vdash_M (q_{i+1}, a_{i+2} \dots a_k) \iff \delta(q_i, a_{i+1}) = q_{i+1} \implies \delta'(q_i, a_{i+1}) = q_{i+1} \\
+             & \implies (q_i, a_{i+1} \dots a_k) \vdash_{M'} (q_{i+1}, a_{i+2} \dots a_k)
+        \end{aligned}
+    $$
+    Esto implica que $(q_0, w) \vdash_{M'}^* (q_k, \lambda)$, y entonces $w \in \L(M')$.
+
+    $\impliedby$) Supongamos que $w \notin \L(M)$. Hay 2 posibilidades:
+    \begin{itemize}
+        \item Se tiene $(q_0, w) \vdash_M^* (q_k, \lambda)$ con $q_k \notin F$. En ese caso, el autómata nunca se indefine y, por un razonamiento análogo, $(q_0, w) \vdash_{M'}^* (q_k, \lambda)$, así que $w \notin \L(M')$.
+        \item Por otro lado, puede suceder que el autómata se indefina durante la ejecución. En tal caso, se tiene una secuencia de estados $q_1, \dots, q_j$:
+              $$(q_0, a_1 \dots a_k) \vdash_M (q_1, a_2 \dots a_k) \vdash_M \cdots \vdash_M (q_j, a_{j+1} \dots a_k)$$
+              Con $\delta(q_j, a_{j+1}) = \indef$.
+
+              En este caso, $\delta' (q_j, a_{j+1}) = q_T$ y, como $\delta'(q_T, a) = q_T\ \forall a \in \Sigma$, el autómata sigue en ese estado hasta consumir el resto de la cadena. Considerando que la ejecución se da de la misma forma en $M'$ antes de la indefinición, se tiene:
+              $$(q_0, a_1 \dots a_k) \vdash_{M'}^+ (q_j, a_{j+1} \dots a_k) \vdash_{M'} (q_T, a_{j+2} \dots a_k) \vdash_{M'}^* (q_T, \lambda)$$
+              Como $q_T \notin F$, $w \notin \L(M')$.
+    \end{itemize}
+\end{proof}
+
+Este resultado implica que los autómatas incompletos tienen el mismo poder expresivo que los completos. Además, la construcción del autómata completo a partir de uno incompleto es computacionalmente barata: sólo requiere agregar un nuevo estado y conectarlo con a lo sumo $|Q|$ estados.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+        \node[state, initial] (0) {$q_0$};
+        \node[state, right of=0] (1) {$q_1$};
+        \node[state, accepting, right of=1] (2) {$q_2$};
+        \node[state, below of=1] (3) {$q_T$};
+
+        \draw   (0) edge[above] node{$a$} (1)
+        (1) edge[above] node{$b$} (2)
+        (0) edge[below, bend right] node{$b$} (3)
+        (1) edge[right] node{$a$} (3)
+        (2) edge[below, bend left] node{$a,b$} (3)
+        (3) edge[loop below] node{$a,b$} (3);
+    \end{tikzpicture}
+    \caption*{Versión completa del autómata anterior, obtenida a partir de agregar un estado trampa.}
+\end{figure}
