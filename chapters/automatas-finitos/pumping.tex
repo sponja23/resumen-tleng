@@ -1,0 +1,89 @@
+\section{Lema de Pumping}
+
+El \textbf{lema de pumping} es una propiedad que cumplen todos los lenguajes regulares. Se puede enunciar de la siguiente manera:
+
+\begin{theorem*}
+    Sea $\L$ un lenguaje regular. Luego, existe una longitud $p \in \N$ tal que cualquier cadena $z$ con longitud $|z| \geq p$ se puede \textbf{factorizar} de la siguiente manera:
+    $$
+        z = u v w
+    $$
+    Donde las subcadenas cumplen las siguientes propiedades:
+    $$
+        \begin{aligned}
+            |uv|    & \leq p                    \\
+            |v|     & \geq 1                    \\
+            u v^i w & \in \L \ \forall i \geq 0
+        \end{aligned}
+    $$
+\end{theorem*}
+
+En otras palabras, para cualquier lenguaje regular existe una longitud (denominada \textbf{constante de pumping}\footnote{Es importante notar que, bajo esta definición, la constante de pumping no es única: es fácil ver que, si $p$ es constante de pumping para un lenguaje $\L$, cualquier $m > p$ también lo es. Lo que sí es único para cada lenguaje es su \textbf{mínima} constante de pumping.}) a partir de la cual las cadenas se pueden ``bombear'', es decir, descomponer en prefijo $\cdot$ ``parte bombeable'' $\cdot$ sufijo, y cualquier cadena que resulte de repetir la parte bombeable también pertenecerá al lenguaje.
+
+\subsection{Demostración}
+
+\begin{proof}
+    Para demostrar el lema de pumping, es convienente tomar un autómata finito determinístico $M = \langle Q, \Sigma, \delta, q_0, F \rangle$ que reconoce $\L$, es decir, que cumple $\L(M) = \L$. Demostraremos que una posible constante de pumping es precisamente la cantidad de estados del autómata $p = |Q|$.
+
+    Sea $z \in \L(M)$ una cadena con longitud $m \geq p$. Recordemos que una forma de definir el lenguaje aceptado por $M$ es:
+    $$
+        z \in \L(M) \iff \exists q_f \in F, (q_0, z) \vdash^* (q_f, \lambda)
+    $$
+
+    Por ende, sea $q_f$ el estado final en el que termina $M$ al consumir $z$. Por otro lado, según la \hyperref[subsubsec-propiedades-rel-transicion]{propiedad de linealidad} de la relación de transición:
+    $$
+        |z| = m \implies (q_0, z) \vdash^m (q_f, \lambda)
+    $$
+
+    Es decir, el autómata debe pasar por $m$ transiciones hasta llegar al estado final, lo cual implica que pasa por $m + 1$ estados. Como hay sólo $p < m + 1$ estados, el autómata debe pasar 2 veces por algún estado (debido al Principio del Palomar). Más aún, consideremos el prefijo $\alpha$ de $z$ de longitud $p$ ($z = \alpha \cdot \beta$): su ejecución por el autómata también debe repetir algún estado, porque pasa por $p + 1$ estados.
+
+    Tomemos la cadena de configuraciones instantáneas empezando en $(q_0, \alpha)$, con la notación $\alpha = a_0 \cdots a_p$:
+    $$
+        (q_0, a_0 \cdots a_p) \vdash (r_1, a_1 \cdots a_p) \vdash \cdots \vdash (r_i, a_i \cdots a_p) \vdash \cdots \vdash (r_i, a_j \cdots a_p) \vdash \cdots \vdash (r_k, \lambda)
+    $$
+
+    Como mencionamos, el autómata debe pasar 2 veces por algún estado: en este caso ese estado se denota $r_i$. Luego, llamemos:
+    $$
+        \begin{aligned}
+            u & := a_0 \cdots a_{i - 1}       \\
+            v & := a_i \cdots a_{j - 1}       \\
+            w & := a_j \cdots a_p \cdot \beta
+        \end{aligned}
+    $$
+
+    Se puede ver que $uvw = a_0 \cdots a_p \cdot \beta = \alpha \cdot \beta = z$. Ahora, demostremos las propiedades del lema de pumping:
+    \begin{itemize}
+        \item $|uv| = j \leq p$: Trivial, por construcción.
+        \item $|v| \geq 1$: No se podría tener $|v| = 0$, porque la cadena de transiciones $(r_i, a_i \cdots a_p) \vdash \cdots \vdash (r_i, a_j \cdots a_p)$ no puede estar vacía.
+        \item $u v^i w \in \L \ \forall i \geq 0$: Gracias a la propiedad de invarianza, se tiene que:
+        $$
+            (r_i, v) \vdash (r_i, \lambda) \implies (r_i, v^m) \vdash (r_i, \lambda) \ \forall m \geq 0
+        $$
+        Por ende, para cualquier natural $m \geq 0$, se tiene:
+        $$
+            (q_0, u \cdot v^m \cdot w) \vdash^* (r_i, v^m \cdot w) \vdash^* (r_i, w) \vdash^* (q_f, \lambda)
+        $$
+        Es decir, $u v^m w \in \L(M)$.
+    \end{itemize}
+\end{proof}
+
+\subsection{Refutando Regularidad}
+
+Una de las aplicaciones del Lema de Pumping es en demostrar que un lenguaje particular no puede ser regular: como todos los lenguajes regulares cumplen este lema, si un lenguaje no lo cumple entonces no es regular.
+
+Tomemos como ejemplo el lenguaje $\L = \{a^n b^n \mid n \in \N\}$.
+
+\begin{theorem*}
+    El lenguaje $\L = \{a^n b^n \mid n \in \N\}$ no es regular.
+\end{theorem*}
+\begin{proof}
+    Lo demostraremos por el absurdo: si $\L$ fuera regular, entonces existiría una constante de pumping $p \in \N$. Luego, tomemos la cadena $z = a^p b^p$. Es claro que:
+    \begin{itemize}
+        \item $z \in \L$
+        \item $|z| = 2p \geq p$
+    \end{itemize}
+
+    Por ende, esta cadena se puede factorizar como $z = uvw$, con $|uv| = m \leq p$ y $|v| \geq 1$. Como $uv$ es prefijo de $z$ con longitud a lo sumo $p$, debe estar compuesta únicamente por el símbolo $a$ (porque $z$ empieza con $p$ $a$s). Esto a su vez implica que $v = a^k$ para algún $k \geq 1$. Además, sabemos que:
+    $$uv^2w = a^{m-k}a^{2k}a^{p - m}b^p = a^{p + k}b^p \in \L$$
+    
+    Pero esto es absurdo, porque $p + k \geq p + 1 > p \implies p + k \neq p$.
+\end{proof}

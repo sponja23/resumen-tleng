@@ -19,7 +19,13 @@ El \textbf{orden de precedencia} de estos operadores es $\square^*, \square^+, \
 
 \subsection{Equivalencia con Autómatas Finitos}
 
-Los lenguajes reconocibles por expresiones regulares exactamente los mismos lenguajes reconocibles por autómatas finitos.
+Los lenguajes reconocibles por expresiones regulares exactamente los mismos lenguajes reconocibles por autómatas finitos. Para demostrar esto, demostraremos que:
+\begin{itemize}
+    \item $\L$ es expresable por expresión regular $\implies$ $\L$ es expresable por autómata finito.
+    \item $\L$ es expresable por autómata finito $\implies$ $\L$ es expresable por gramática regular.
+    \item $\L$ es expresable por gramática regular $\implies$ $\L$ es expresable por expresión regular.
+\end{itemize}
+Es decir, como efecto colateral, también demostraremos que éstos son los lenguajes expresables por gramáticas regulares (los \textbf{lenguajes regulares}).
 
 \subsubsection{Expresión Regular $\implies$ Autómata Finito}
 
@@ -197,8 +203,10 @@ Primero veamos que, dada una expresión regular, siempre se puede obtener un aut
 
 La construcción realizada en la demostración se conoce como el \textbf{algoritmo de construcción de Thompson}. Para cada componente de la expresión, se agrega una cantidad constante de estados al autómata. Por ende, el autómata construido para una expresión $r$ tiene $\BigO{|r|}$ estados (y el algoritmo tiene esa misma complejidad temporal).
 
-\subsubsection{Autómata Finito $\implies$ Expresión Regular}
+\subsubsection{Autómata Finito $\implies$ Gramática Regular}
 
-En vez de demostrar directamente que cualquier lenguaje reconocible por autómatas finitos es también reconocible por expresiones regulares, demostraremos primero que los lenguajes de los autómatas finitos son \hyperref[lenguaje-regular]{regulares}, y luego que cualquier lenguaje regular puede ser expresado por medio de una expresión regular.
+\textbf{TODO}
+
+\subsubsection{Gramática Regular $\implies$ Expresión Regular}
 
 \textbf{TODO}
