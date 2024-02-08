@@ -47,21 +47,101 @@ En el caso de los autómatas de pila generales, los 2 tipos de aceptación, por 
     Dado un autómata de pila $M$, existe otro $M'$ tal que $\L(M) = \L_\lambda(M')$.
 \end{theorem*}
 \begin{proof}
-    Sea $M = \langle Q, \Sigma, \Gamma, \delta, q_0, Z_0, F \rangle$. Luego, se puede construir el autómata $M' = \langle Q', \Sigma, \Gamma', \delta', q_0', X_0 \rangle$, de la siguiente manera:
+    Sea $M = \langle Q, \Sigma, \Gamma, \delta, q_0, Z_0, F \rangle$. Luego, se puede construir el autómata $M' = \langle Q', \Sigma, \Gamma', \delta', q_0', X_0, \emptyset \rangle$, de la siguiente manera:
     \begin{itemize}
         \item $Q' = Q \cup \{q_0', q_\lambda\}$
         \item $\Gamma' = \Gamma \cup \{X_0\}$
         \item $\delta'$ tiene las todas transiciones de $\delta$, agregando:
         \begin{itemize}
             \item $\delta'(q_0', \lambda, X_0) = \{(q_0, Z_0 X_0)\}$ (se agrega un nuevo símbolo al fondo de la pila).
-            \item $\delta'(q_f, \lambda, t) = \{(q_\lambda, \lambda)\}$ (los estados finales se conectan a $q_\lambda$).
-            \item $\delta'(q_\lambda, \lambda, t) = \{(q_\lambda, \lambda)\}$ (el estado $q_\lambda$ vacía la pila).
+            \item $(q_\lambda, \lambda) \in \delta'(q_f, \lambda, t) \ \forall q_f \in F, t \in \Gamma$ (los estados finales se conectan a $q_\lambda$).
+            \item $\delta'(q_\lambda, \lambda, t) = \{(q_\lambda, \lambda) \mid t \in \Gamma\}$ (el estado $q_\lambda$ vacía la pila).
         \end{itemize}
     \end{itemize}
 
-    \textbf{TODO}
+    Veamos que este autómata acepta por pila vacía las mismas cadenas que el original acepta por estados finales. La idea es que el autómata apila un nuevo símbolo $X_0$ y \textbf{simula} al autómata original. Cuando se llega a un estado final, se pasa al estado $q_\lambda$, que tiene transiciones para vaciar la pila.
+
+    \begin{itemize}
+        \item $\L(M) \subseteq \L_\lambda(M')$: Supongamos que $w \in \L(M)$. Esto quiere decir que existe algún estado final $q_f$ y cadena de pila $\gamma$ tal que:
+        $$
+            (q_0, w, Z_0) \vdash_M^* (q_f, \lambda, \gamma)
+        $$
+        Además, como $\delta'(q_0', \alpha, X_0) \vdash_{M'} (q_0, \alpha, Z_0 X_0)$ para cualquier cadena $\alpha \in \Sigma^*$, y todas las transiciones de $\delta$ están incluidas en $\delta'$, $M'$ \textbf{simula} a $M$, es decir:
+        $$
+            (q_0', w, X_0) \vdash_{M'} (q_0, w, Z_0 X_0) \vdash_{M'}^* (q_f, \lambda, \gamma X_0)
+        $$
+
+        Una vez que el autómata llega a un estado final $q_f$, puede tomar la transición hacia $q_\lambda$, y luego vaciar el resto de la pila (denotamos $\gamma = t_1 t_2 \cdots t_k$):
+        $$
+            (q_f, \lambda, t_1 t_2 \cdots t_k X_0) \vdash_{M'} (q_\lambda, \lambda, t_2 \cdots t_k X_0)
+        $$
+
+        Luego, las transiciones de $q_\lambda$ permiten consumir todos los símbolos de la pila hasta vaciarla:
+        $$
+            (q_\lambda, \lambda, t_2 \cdots t_k X_0) \vdash_{M'} (q_\lambda, \lambda, t_3 \cdots t_k X_0) \vdash_{M'} \cdots \vdash_{M'} (q_\lambda, \lambda, X_0) \vdash_{M'} (q_\lambda, \lambda, \lambda)
+        $$
+
+        Juntando todas las cadenas de transiciones, se tiene:
+        $$
+            (q_0', w, X_0) \vdash_{M'}^* (q_\lambda, \lambda, \lambda) \implies w \in \L_\lambda(M')
+        $$
+
+        \item $\L_\lambda(M') \subseteq \L(M)$: Si $w \in \L_\lambda(M')$, es porque:
+        $$
+            (q_0', w, X_0) \vdash_{M'}^* (q_\lambda, \lambda, \lambda)
+        $$
+
+        Esto es porque la única transición que puede desapilar el símbolo inicial $X_0$ es la que está en $q_\lambda$. Más aún, estas transiciones deben ser de la forma:
+        $$
+            (q_0', w, X_0) \vdash_{M'} \underbrace{(q_0, w, Z_0 X_0) \vdash_{M'}^* (q_f, w, \gamma X_0)}_{\text{Simulación de } M} \vdash_{M'}^* (q_\lambda, \lambda, \lambda)
+        $$
+
+        Las transiciones que simulan a $M$ también están presentes en $M$, así que se tiene:
+        $$
+            (q_0, w, Z_0) \vdash_M^* (q_f, w, \gamma) \implies w \in \L(M)
+        $$
+    \end{itemize}
 \end{proof}
 
 \subsubsection{Pila Vacía $\implies$ Estados Finales}
+
+\begin{theorem*}
+    Dado un autómata de pila $M$, existe otro $M'$ tal que $\L(M') = L_\lambda(M)$.
+\end{theorem*}
+\begin{proof}
+    Sea $M = \langle Q, \Sigma, \Gamma, \delta, q_0, Z_0, \emptyset \rangle$. Se define $M' = \langle Q', \Sigma, \Gamma', \delta', q_0', X_0, F \rangle$, donde:
+    \begin{itemize}
+        \item $Q' = Q \cup \{q_0', q_f\}$
+        \item $\Gamma' = \Gamma \cup \{X_0\}$
+        \item $\delta'$ tiene todas las transiciones de $\delta$, agregando:
+        \begin{itemize}
+            \item $\delta'(q_0', \lambda, X_0) = \{(q_0, Z_0 X_0)\}$ (se agrega un nuevo símbolo al fondo de la pila).
+            \item $(q_f, \lambda) \in \delta'(q, \lambda, X_0)$ (todos los estados pueden pasar al estado final consumiendo el símbolo nuevo).
+        \end{itemize}
+        \item $F = \{q_f\}$
+    \end{itemize}
+
+    En este caso, el autómata nuevo también simula al original. Veamos que aceptan los mismos lenguajes:
+    \begin{itemize}
+        \item $\L_\lambda(M) \subseteq \L(M')$: Si $w \in \L_\lambda(M)$, entonces se tiene $(q_0, w, Z_0) \vdash_M (q, \lambda, \lambda)$ para algún $q \in Q$. Luego, por la definición de $\delta'$, también vale:
+        $$
+            (q_0', w, X_0) \vdash_{M'} \underbrace{(q_0, w, Z_0 X_0) \vdash_{M'}^* (q, \lambda, \lambda)}_{\text{Simulación de } M} \vdash_{M'} (q_f, \lambda, \lambda)
+        $$
+
+        Es decir,
+        $$
+            (q_0', w, X_0) \vdash_{M'}^* (q_f, \lambda, \lambda) \implies w \in \L(M')
+        $$
+        \item $\L(M') \subseteq \L_\lambda(M)$: Para que una cadena $w$ sea aceptada por $M'$, la ejecución debe comenzar por $q_0'$, pasar por transiciones de $M$ hasta consumir toda la cadena de entrada y llegar al símbolo $X_0$, para después pasar al nuevo estado final $q_f$. Es decir, la cadena de transiciones debe ser de la forma:
+        $$
+            (q_0', w, X_0) \vdash_{M'} \underbrace{(q_0, w, Z_0 X_0) \vdash_{M'}^* (q, \lambda, \lambda)}_{\text{Simulación de } M} \vdash_{M'} (q_f, \lambda, \lambda)
+        $$
+
+        Entonces, como las transiciones simuladas también están presentes en el autómata original, se tiene:
+        $$
+            (q_0, w, Z_0 X_0) \vdash_M^* (q, \lambda, \lambda) \implies w \in \L_\lambda(M)
+        $$
+    \end{itemize}
+\end{proof}
 
 \textbf{TODO}
