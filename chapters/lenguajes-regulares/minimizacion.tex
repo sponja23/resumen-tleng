@@ -1,0 +1,152 @@
+\section{Minimización de Autómatas Finitos}
+
+Para cualquier autómata finito determinístico, hay uno que reconoce el mismo lenguaje y tiene la mínima cantidad de estados. Dicho de otra forma, para cualquier lenguaje regular existe un autómata finito determinístico \textbf{mínimo} que lo reconoce. En el proceso de demostrar esto, daremos un algoritmo para encontrar el
+
+\subsection{Indistinguibilidad}
+
+Sea $M = \langle Q, \Sigma, \delta, q_0, F \rangle$ un autómata finito determinístico. Luego, se puede definir la \textbf{relación de indistinguibilidad} entre estados del autómata $\mathop\equiv \subseteq Q \times Q$, de la siguiente manera:
+$$
+    q \equiv r \iff (\forall \alpha \in \Sigma^*, \hat \delta(q, \alpha) \in F \iff \hat \delta(r, \alpha) \in F)
+$$
+
+Es decir, dos estados son indistinguibles cuando las mismas cadenas terminan en estados finales al comenzar su ejecución en esos estados.
+
+\label{estados-indistinguibles-lema-cadenas}
+\begin{lemma*}
+    Todo par de estados indistinguibles en un autómata $M = \langle Q, \Sigma, \delta, q_0, F \rangle$, al consumir una cadena $\alpha$, llega a otro par de estados indistinguibles. Es decir,
+    $$
+        q \equiv r \implies \forall \alpha \in \Sigma^*, \hat \delta(q, \alpha) \equiv \hat \delta(r, \alpha)
+    $$
+\end{lemma*}
+\begin{proof}
+    La demostración será por el absurdo: supongamos que $q \equiv r$, pero existe una cadena $\alpha \in \Sigma^*$ tal que $\hat \delta(q, \alpha) \not\equiv \hat \delta(r, \alpha)$. Esto implica que hay una cadena $\beta \in \Sigma^*$ que \textbf{distingue} a $\hat \delta(q, \alpha)$ de $\hat \delta(r, \alpha)$.
+
+    Supongamos, sin pérdida de generalidad, que $\beta$ cumple:
+
+    $$
+        \hat \delta(\hat \delta(q, \alpha), \beta) \in F \land \hat \delta(\hat \delta(r, \alpha), \beta) \notin F
+    $$
+
+    Luego, por la definición de $\hat \delta$, esto quiere decir que:
+    $$
+        \hat \delta(q, \alpha \cdot \beta) \in F \land \hat \delta(r, \alpha \cdot \beta) \notin F
+    $$
+
+    Por ende, $q \not\equiv r$. Esto es absurdo.
+\end{proof}
+
+\subsection{Estados Inaccesibles}
+
+Los \textbf{estados accesibles} de un AFD $M = \langle Q, \Sigma, \delta, q_0, F \rangle$ son aquellos alcanzables desde el estado inicial. Es decir, $q \in Q$ es accesible cuando:
+$$
+    \exists \alpha \in \Sigma^* \mid \hat \delta(q_0, \alpha) = q
+$$
+
+Es claro que estos estados pueden ser eliminados sin cambiar el lenguaje aceptado por $M$. Esta es una forma fácil de reducir la cantidad de estados del mismo. El siguiente algoritmo computa el conjunto de estados accesibles de un autómata por medio de DFS:
+
+
+
+\begin{algorithm}[H]
+    \caption{Estados accesibles de un AFD}
+    \label{accesibles}
+    \begin{algorithmic}[1]
+        \Procedure{EstadosAccessibles}{$\langle Q, \Sigma, \delta, q_0, F \rangle$}
+        \State $accesibles \gets \{q_0\}$
+        \State $nuevos \gets \{q_0\}$
+        \Repeat
+        \State $temp \gets \emptyset$
+        \ForAll{$q \in nuevos$}
+        \ForAll{$c \in \Sigma$}
+        \State $temp \gets temp \cup \{\delta(q, c)\}$
+        \EndFor
+        \EndFor
+        \State $nuevos \gets temp \setminus accesibles$
+        \State $accesibles \gets accesibles \cup nuevos$
+        \Until{{$nuevos = \emptyset$}}
+        \State \Return $accesibles$
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+\subsection{Definición de AFD Mínimo}
+
+Dado un autómata $M = \langle Q, \Sigma, \delta, q_0, F \rangle$, un AFD mínimo equivalente es uno definido como $M_{min} = \langle Q_{min}, \Sigma, \delta_{min}, q_{min_0}, F_{min} \rangle$, donde:
+
+\begin{itemize}
+    \item $Q_{min} := (Q / \mathop\equiv)$ (las clases de equivalencia de $\addcontentsline{file}{secunit}{entry}equiv$)
+    \item $\delta_{min} := [\delta(q, a)]$ ($[q]$ es la clase de equivalencia del estado $q$)
+    \item $q_{min_0} := [q_0]$
+    \item $F_{min} = \{[q] \mid q \in F\}$
+\end{itemize}
+
+\subsubsection{Demostración de Equivalencia}
+
+Para ver que el autómata es efectivamente equivalente, veamos la siguiente propiedad:
+
+\begin{lemma*}
+    Si $\hat \delta(q, \alpha) = r$, entonces $\hat\delta_{min}([q], \alpha) = [r]$
+\end{lemma*}
+\begin{proof}
+    Será por inducción en la longitud de $\alpha$
+    \begin{itemize}
+        \item \textbf{Caso Base}: Si $|\alpha| = 0$, $\alpha = \lambda$. Entonces, se puede ver que $\hat \delta(q, \lambda) = q$ (por definición de $\hat \delta$), y que $\hat\delta_{min}([q], \lambda) = [q]$ (por definición de $\hat\delta_{min}$).
+        \item \textbf{Paso Inductivo}: Si $|\alpha| > 0$, la cadena es de la forma $\alpha = \beta a$. Supongamos que $\hat \delta(q, \beta a) = r$. Por definición de $\hat \delta$, esto significa que debe haber algún estado $s \in Q$ tal que:
+              $$\hat \delta(q, \beta) = s \land \delta(s, a) = r$$
+
+              Pero entonces, por hipótesis inductiva,
+              $$\hat\delta_{min}([q], \beta) = [s]$$
+
+              Por otro lado, si un estado $t$ es indistiguible de $s$, se tiene que
+              $$t \equiv s \implies \hat\delta(s, a) = r \equiv \hat\delta(t, a)$$
+
+              Esto es equivalente a decir que la clase de equivalencia $[s]$ cumple:
+              $$
+                  \hat\delta_{min}([s], a) = [r]
+              $$
+
+              Luego, por la definición de $\hat\delta_{min}$:
+              $$
+                  \hat\delta_{min}([q], \beta) = [s] \land \hat\delta_{min}([s], a) = [r] \implies \hat\delta_{min}([q], \beta a) = [r]
+              $$
+    \end{itemize}
+\end{proof}
+
+Ahora la demostración de equivalencia es bastante directa:
+
+\begin{theorem*}
+    Dado un AFD $M$, su autómata mínimo correspondiente $M_{min}$ es equivalente, es decir, $\L(M) = \L(M_{min})$.
+\end{theorem*}
+\begin{proof}
+    Sea $M = \langle Q, \Sigma, \delta, q_0, F \rangle$. Demostremos la doble inclusión:
+    \begin{itemize}
+        \item $\L(M) \subseteq \L(M_{min})$: Una cadena está en $\L(M)$ cuando
+              $$
+                  w \in \L(M) \iff \hat\delta(q_0, w) \in F \iff \exists q_f \in F \mid \hat\delta(q_0, w) = q_f
+              $$
+
+              Por el lema anterior, esto implica que
+              $$\exists q_f \in F \mid \hat\delta_{min}([q_0], w) = [q_f] \iff \hat\delta_{min}([q_0], w) \in F_{min} \iff w \in \L(M_{min})$$
+        \item Por otro lado, también se tiene:
+              $$
+                  w \in \L(M_{min}) \iff \hat\delta_{min}([q_0], w) \in F_{min} \implies
+                  \exists q_f \in F \mid \hat\delta(q_0, w) \equiv q_f
+              $$
+
+              Pero la única forma de que un estado sea equivalente a uno final es que éste mismo también lo sea, porque $q \equiv r \implies (\hat\delta(q, \lambda) \in F \iff \hat\delta(r, \lambda) \in F)$, es decir, $q \in F \iff r \in F$. Esto quiere decir que:
+              $$
+                  \hat\delta(q_0, w) \equiv q_f \iff \hat\delta(q_0, w) \in F \iff w \in F
+              $$
+    \end{itemize}
+\end{proof}
+
+\subsubsection{Demostración de Minimalidad}
+
+Ahora, veamos que $M_{min}$ es el autómata equivalente con la menor cantidad de estados posibles. Para ello, primero usamos el siguiente lema:
+
+\begin{lemma*}
+    Sean $M = \langle Q, \Sigma, \delta, q_0, F \rangle$ y $M' = \langle Q', \Sigma, \delta', q_0', F' \rangle$, donde $M$ no posee estados inaccesibles. Si $|Q| > |Q'|$, hay algún par de cadenas $w_1, w_2 \in \Sigma$ tal que $\hat\delta(q_0, w_1) \neq \hat\delta(q_0, w_2)$ y $\hat\delta'(q_0', w_1) = \hat\delta'(q_0', w_2)$.
+\end{lemma*}
+\begin{proof}
+    \textbf{TODO}
+\end{proof}
+

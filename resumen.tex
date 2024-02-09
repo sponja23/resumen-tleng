@@ -14,8 +14,9 @@
 \usepackage{graphics}
 \usepackage{tikz}
 \usepackage{multirow}
-\usepackage{clrscode3e}
 \usepackage{environ}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
 \usepackage[skip=10pt,indent=10pt]{parskip}
 
 % Setup de tikz
@@ -28,6 +29,9 @@
     every state/.style={thick, fill=gray!10}, % sets the properties for each ’state’ node
     initial text=$ $, % sets the text that appears on the start arrow
 }
+
+% Corregir título de algoritmos
+\floatname{algorithm}{Algoritmo}
 
 % Imágenes
 \graphicspath{{img/}}
@@ -83,6 +87,7 @@
 \newcommand{\derivp}{\overset{+}{\Rightarrow}}
 \newcommand{\indef}{\mathrm \perp}
 
+% Teoremas
 \newtheorem*{theorem*}{Teorema}
 \newtheorem*{lemma*}{Lema}
 
