@@ -193,7 +193,7 @@ Ahora, demostremos que $M_{min}$ es minimal:
 
 \subsection{Algoritmo de Moore}
 
-El algoritmo de minimizacón de Moore se puede utilizar para obtener el autómata $M_{min}$. Éste se basa en computar la relación de indistinguibilidad iterativamente.
+El \textbf{algoritmo de minimizacón de Moore} se puede utilizar para obtener el autómata $M_{min}$. Éste se basa en computar la relación de indistinguibilidad iterativamente.
 
 \subsubsection{Indistinguibilidad de Orden $k$}
 
@@ -207,7 +207,7 @@ Es decir, dos estados son equivalentes según esta relación cuando todas las ca
 Veamos que cumple las siguientes propiedades:
 \begin{enumerate}
     \item $\overset{k}{\equiv}$ es una relación de equivalencia: trivial.
-    \item $\overset{k + 1}{\equiv} \subseteq \overset{k}{\equiv}$:
+    \item $\mathop{\overset{k + 1}{\equiv}} \subseteq \mathop{\overset{k}{\equiv}}$:
           \begin{itemize}
               \item Si $p \overset{k + 1}{\equiv} q$, entonces $\forall \alpha \in \Sigma^*, |\alpha| \leq k + 1,\ (\hat\delta(p, \alpha) \in F \iff \hat\delta(q, \alpha) \in F)$. En particular, se cumple para las cadenas de longitud a lo sumo $k$, así que $p \overset{k}{\equiv} q$.
           \end{itemize}
@@ -240,14 +240,55 @@ Veamos que cumple las siguientes propiedades:
           \end{itemize}
 \end{enumerate}
 
-De estas propiedades, surge fácilmente el algoritmo de minimización de Moore:
+La última propiedad nos indica que si $\mathop{\overset{k}{\equiv}} = \mathop{\overset{k + 1}{\equiv}}$, entonces $\mathop{\overset{k}{\equiv}} = \mathop{\equiv}$, porque cuando $p \overset{k}{\equiv} q$ se tiene $\hat\delta(p, \alpha) \in F \iff \hat\delta(q, \alpha) \in F$ para cualquier $\alpha \in \Sigma^*$, ya que, en particular, $p \overset{|\alpha|}{\equiv} q$.
+
+Por otro lado, la propiedad 4 nos provee una forma de computar la relación $\overset{i + 1}{\equiv}$ a partir de la $\overset{i}{\equiv}$. Esta consiste en mantener la partición de los estados correspondiente a $\overset{i}{\equiv}$, y verificar a qué clase transiciona cada estado. Los estados que transicionan a las mismas clases para cada símbolo) pertenecerán a la misma clase de $\overset{i + 1}{\equiv}$, mientras que aquellos que no estarán en clases separadas.
+
+Por último, la propiedad 3 nos da un caso base para comenzar la ejecución. El procedimiento es el siguiente:
 
 \begin{algorithm}[H]
     \caption{Algoritmo de Minimización de Moore}
     \label{minimizacion-moore}
     \begin{algorithmic}[1]
         \Procedure{MinimizaciónMoore}{$\langle Q, \Sigma, \delta, q_0, F \rangle$}
-        \State \textbf{TODO}
+        \State $P \gets \{Q \setminus F, F\}$
+        \State $i \gets 1$
+        \While{$P \neq \{X / \mathop{\overset{i}{\equiv}} \mid X \in P\}$}
+        \State $P \gets \{X / \mathop{\overset{i}{\equiv}} \mid X \in P\}$
+        \State $i \gets i + 1$
+        \EndWhile
+        \State $M_{min} \gets $ \parbox[t]{.5\linewidth}{$\langle Q_{min}, \Sigma, \delta_{min}, q_{min_0}, F_{min} \rangle$ \vspace{3pt}\\
+            \small donde:
+            $$
+            \begin{aligned}
+                & Q_{min} := P \\
+                & \delta_{min}([q], a) := [\delta(q, a)]\ \forall q \in Q \\
+                & q_{min_0} := [q_0] \\
+                & F_{min} := \{[q] \mid q \in F\}
+            \end{aligned}
+            $$}
+        \State \Return $M_{min}$
         \EndProcedure
     \end{algorithmic}
 \end{algorithm}
+
+Este algoritmo tiene una complejidad de $\BigO{n^2 s}$, donde $n = |Q|$ y $s = |\Sigma|$. Esto se debe a que hay a lo sumo $n$ iteraciones del ciclo (cuando el autómata ya es mínimo y todos los estados son indistinguibles), y cada iteración requiere verificar la transición en cada símbolo (son $s$ símbolos) para cada estado (son $n$ estados).
+
+\subsection{Algoritmo de Brzozowski}
+
+El \textbf{algoritmo de Brzozowski} es un método alternativo para obtener un autómata mínimo. El procedimiento es el siguiente:
+
+\begin{algorithm}[H]
+    \caption{Algoritmo de Minimización de Brzozowski}
+    \label{minimizacion-brzozowski}
+    \begin{algorithmic}[1]
+        \Procedure{MinimizaciónBrzozowski}{$M$}
+        \State $M^R \gets \textsc{Revertir}(M)$
+        \State $M^R_D \gets \textsc{Determinizar}(M^R)$
+        \State $(M^R_D)^R \gets \textsc{Revertir}(M^R_D)$
+        \State \Return $(M^R_D)^R$
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+Para ver por qué el autómata es mínimo, \textbf{TODO}
