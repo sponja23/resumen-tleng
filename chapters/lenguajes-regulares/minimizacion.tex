@@ -44,8 +44,6 @@ $$
 
 Es claro que estos estados pueden ser eliminados sin cambiar el lenguaje aceptado por $M$. Esta es una forma fácil de reducir la cantidad de estados del mismo. El siguiente algoritmo computa el conjunto de estados accesibles de un autómata por medio de DFS:
 
-
-
 \begin{algorithm}[H]
     \caption{Estados accesibles de un AFD}
     \label{accesibles}
@@ -147,6 +145,109 @@ Ahora, veamos que $M_{min}$ es el autómata equivalente con la menor cantidad de
     Sean $M = \langle Q, \Sigma, \delta, q_0, F \rangle$ y $M' = \langle Q', \Sigma, \delta', q_0', F' \rangle$, donde $M$ no posee estados inaccesibles. Si $|Q| > |Q'|$, hay algún par de cadenas $w_1, w_2 \in \Sigma$ tal que $\hat\delta(q_0, w_1) \neq \hat\delta(q_0, w_2)$ y $\hat\delta'(q_0', w_1) = \hat\delta'(q_0', w_2)$.
 \end{lemma*}
 \begin{proof}
-    \textbf{TODO}
+    Demostramos el contrapositivo: supongamos que para todo par de cadenas $w_1, w_2 \in \Sigma^*$, si éstas llevan a estados distintos en $M$ también llevan a estados distintos de $M'$.
+
+    Primero, construyamos una función inyectiva entre $Q$ y $Q'$. Para ello, será necesario definir algún orden $\leq$ entre los símbolos de $\Sigma$, para luego definir la función $g: Q \to \Sigma^*$ de la siguiente manera:
+    $$
+        g(q) := \argmin_{\prec} \left\{\alpha \in \Sigma^* \mid \hat\delta(q_0, \alpha) = q\right\}
+    $$
+
+    Donde $\prec$ es el orden entre cadenas de $\Sigma^*$ que ordena primero por longitud y luego por orden lexicográfico según $\leq$. Es decir, $g(q)$ es la cadena de menor longitud (el ``camino mínimo'') que lleva al autómata de $q_0$ a $q$. Es claro que $g$ es inyectiva, porque no es posible que una misma cadena lleve a dos estados distintos en un autómata determinístico.
+
+    Ahora se puede definir la función $f: Q \to Q'$:
+    $$
+        f(q) := \hat\delta'(q_0', g(q))
+    $$
+
+    Como supusimos que $\forall w_1, w_2 \in \Sigma^*,\ \hat\delta(q_0, w_1) \neq \hat\delta(q_0, w_2) \implies \hat\delta'(q_0', w_1) \neq \hat\delta'(q_0', w_2)$, y la función $g$ es inyectiva, se tiene que:
+    $$
+        q \neq r \implies g(q) \neq g(r) \implies \hat\delta'(q_0', g(q)) \neq \hat\delta'(q_0', g(r)) \iff f(q) \neq f(r)
+    $$
+
+    Es decir, $f$ es inyectiva. Esto implica que $|Q| \leq |Q'|$.
 \end{proof}
 
+Ahora, demostremos que $M_{min}$ es minimal:
+
+\begin{theorem*}
+    Dado un autómata $M = \langle Q, \Sigma, \delta, q_0, F \rangle$, el autómata $M_{min}$ construido usando la relación de indistinguibilidad $\equiv$ es minimal en estados entre todos los autómatas equivalentes, es decir, para todo autómata $M'$, $\L(M') = \L(M) \implies |Q_{min}| \leq |Q'|$
+\end{theorem*}
+\begin{proof}
+    Nuevamente, demostramos el contrapositivo: sea $M'= \langle Q', \Sigma, \delta', q_0', F' \rangle$ un AFD con $|Q'| > |Q_{min}|$. Según el lema anterior, existen cadenas $\alpha, \beta \in \Sigma^*$ tales que:
+    $$
+        (\hat\delta_{min}(q_{min_0}, \alpha) \neq \hat\delta_{min}(q_{min_0}, \beta)) \land (\hat\delta'(q_0, \alpha) = \hat\delta'(q_0, \beta))
+    $$
+
+    Como $\hat\delta_{min}(q_{min_0}, \alpha)$ y $\hat\delta_{min}(q_{min_0}, \beta)$ son indistinguibles (si no, pertenecerían a la misma clase de indistinguibilidad, y por ende serían el mismo autómata), hay una cadena $\gamma$ que cumple (sin pérdida de generalidad):
+    $$
+        \hat\delta_{min}(q_{min_0}, \alpha\gamma) \in F \land \hat\delta_{min}(q_{min_0}, \beta\gamma) \notin F
+    $$
+
+    Es decir, $\alpha\gamma \in \L(M_{min}) \iff \beta\gamma \notin \L(M_{min})$. Sin embargo, en el autómata $M'$, como los estados son iguales, se tiene:
+    $$
+        \hat\delta'(q_0, \alpha) = \hat\delta'(q_0, \beta) \implies \hat\delta'(q_0, \alpha\gamma) = \hat\delta'(q_0, \beta\gamma) \implies (\alpha\gamma \in \L(M') \iff \beta\gamma \in \L(M'))
+    $$
+
+    Pero entonces, alguna de las cadenas $\alpha\gamma$ y $\beta\gamma$ está en uno de los lenguajes y no en el otro. Por ende, $\L(M') \neq \L(M_{min})$.
+\end{proof}.
+
+\subsection{Algoritmo de Moore}
+
+El algoritmo de minimizacón de Moore se puede utilizar para obtener el autómata $M_{min}$. Éste se basa en computar la relación de indistinguibilidad iterativamente.
+
+\subsubsection{Indistinguibilidad de Orden $k$}
+
+En realidad, en cada paso se computa la \textbf{indistinguibilidad de orden $k$}, denotada por $\overset{k}{\equiv}$. Esta relación está definida como:
+$$
+    p \overset{k}{\equiv} q \iff \forall \alpha \in \Sigma^*, |\alpha| \leq k,\ (\hat\delta(p, \alpha) \in F \iff \hat\delta(q, \alpha) \in F)
+$$
+
+Es decir, dos estados son equivalentes según esta relación cuando todas las cadenas de longitud a lo sumo $k$ no distinguen entre ellos (en términos de pertenencia a $F$).
+
+Veamos que cumple las siguientes propiedades:
+\begin{enumerate}
+    \item $\overset{k}{\equiv}$ es una relación de equivalencia: trivial.
+    \item $\overset{k + 1}{\equiv} \subseteq \overset{k}{\equiv}$:
+          \begin{itemize}
+              \item Si $p \overset{k + 1}{\equiv} q$, entonces $\forall \alpha \in \Sigma^*, |\alpha| \leq k + 1,\ (\hat\delta(p, \alpha) \in F \iff \hat\delta(q, \alpha) \in F)$. En particular, se cumple para las cadenas de longitud a lo sumo $k$, así que $p \overset{k}{\equiv} q$.
+          \end{itemize}
+    \item Si $F \neq \emptyset$ y $F \neq Q$, entonces $Q / \mathop{\overset{0}{\equiv}} = \{Q \setminus F, F\}$:
+          \begin{itemize}
+              \item La única cadena de longitud $0$ es $\lambda$, así que $p \overset{0}{\equiv} q \iff (\hat\delta(p, \lambda) \in F \iff \hat\delta(q, \lambda) \in F)$ lo cual, por definición de $\hat\delta$, es lo mismo que $p \in F \iff q \in F$. Es decir, esta relación sólo distingue entre los estados que están en $F$ y los que no.
+          \end{itemize}
+    \item $p \overset{k + 1}{\equiv} q \iff \forall a \in \Sigma,\ \delta(p, a) \overset{k}{\equiv} \delta(q, a)$:
+          \begin{gather*}
+              p \overset{k + 1}{\equiv} q \\
+              \Updownarrow \\
+              \forall \alpha \in \Sigma^*, |\alpha| \leq k + 1,\ (\hat\delta(p, \alpha) \in F \iff \hat\delta(q, \alpha) \in F) \\
+              \Updownarrow \\
+              \forall a \in \Sigma, \forall \alpha \in \Sigma^*, |\alpha| \leq k, (\hat\delta(p, a \alpha) \in F \iff \hat\delta(q, a \alpha) \in F) \\
+              \Updownarrow \\
+              \forall a \in \Sigma, \underbrace{\forall \alpha \in \Sigma^*, |\alpha| \leq k, (\hat\delta(\delta(p, a), \alpha) \in F \iff \hat\delta(\delta(q, a), \alpha) \in F)}_{\delta(p, a) \overset{k}{\equiv} \delta(q, a)} \\
+              \Updownarrow \\
+              \forall a \in \Sigma, \delta(p, a) \overset{k}{\equiv} \delta(q, a)
+          \end{gather*}
+    \item Si $\mathop{\overset{k + 1}{\equiv}} = \mathop{\overset{k}{\equiv}}$, entonces $\forall n \geq 0,\ \mathop{\overset{k + n}{\equiv}} = \mathop{\overset{k}{\equiv}}$: la demostración es por inducción en $n$
+          \begin{itemize}
+              \item \textbf{Caso base}: $n = 0$ es trivial, y $n = 1$ vale por hipótesis.
+              \item \textbf{Paso inductivo}: Veamos que para todo par de estados $p, q \in Q$ se tiene $p \overset{k + n + 1}{\equiv} q \iff p \overset{k}{\equiv} q$:
+                    \begin{flalign*}
+                         &  & p \overset{k + n + 1}{\equiv} q & \iff \forall a \in \Sigma,\ \delta(p, a) \overset{k + n}{\equiv} \delta(q, a) &  & \text{(propiedad anterior)}  \\
+                         &  &                                 & \iff \forall a \in \Sigma,\ \delta(p, a) \overset{k}{\equiv} \delta(q, a)     &  & \text{(hipótesis inductiva)} \\
+                         &  &                                 & \iff p \overset{k + 1}{\equiv} q                                              &  & \text{(propiedad anterior)}  \\
+                         &  &                                 & \iff p \overset{k}{\equiv} q                                                  &  & \text{(por hipótesis)}
+                    \end{flalign*}
+          \end{itemize}
+\end{enumerate}
+
+De estas propiedades, surge fácilmente el algoritmo de minimización de Moore:
+
+\begin{algorithm}[H]
+    \caption{Algoritmo de Minimización de Moore}
+    \label{minimizacion-moore}
+    \begin{algorithmic}[1]
+        \Procedure{MinimizaciónMoore}{$\langle Q, \Sigma, \delta, q_0, F \rangle$}
+        \State \textbf{TODO}
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
