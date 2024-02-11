@@ -66,6 +66,8 @@ Es claro que estos estados pueden ser eliminados sin cambiar el lenguaje aceptad
     \end{algorithmic}
 \end{algorithm}
 
+Un \textbf{autómata accesible} es un autómata en el que todos los estados son accesibles.
+
 \subsection{Definición de AFD Mínimo}
 
 Dado un autómata $M = \langle Q, \Sigma, \delta, q_0, F \rangle$, un AFD mínimo equivalente es uno definido como $M_{min} = \langle Q_{min}, \Sigma, \delta_{min}, q_{min_0}, F_{min} \rangle$, donde:
@@ -191,6 +193,8 @@ Ahora, demostremos que $M_{min}$ es minimal:
     Pero entonces, alguna de las cadenas $\alpha\gamma$ y $\beta\gamma$ está en uno de los lenguajes y no en el otro. Por ende, $\L(M') \neq \L(M_{min})$.
 \end{proof}.
 
+En realidad, esta demostración vale para cualquier autómata con estados distinguibles entre sí, es decir, cualquier autómata en el cual $p \not\equiv q \ \forall p, q \in Q$.
+
 \subsection{Algoritmo de Moore}
 
 El \textbf{algoritmo de minimizacón de Moore} se puede utilizar para obtener el autómata $M_{min}$. Éste se basa en computar la relación de indistinguibilidad iterativamente.
@@ -291,4 +295,6 @@ El \textbf{algoritmo de Brzozowski} es un método alternativo para obtener un au
     \end{algorithmic}
 \end{algorithm}
 
-Para ver por qué el autómata es mínimo, \textbf{TODO}
+Es claro que el autómata $(M^R_D)^R$ es equivalente a $M$. Sin embargo, este autómata tiene una propiedad particular: no hay ningún par de estados que acepten la misma cadena. Esto es consecuencia de que hay un único estado final, que en $M^R_D$ funciona como inicial, y si una cadena $\alpha$ llegara a éste empezando tanto en $p$ como $q$, entonces en $M^R_D$ la cadena $\alpha^r$ debería llegar a ambos estados (lo cual es absurdo porque es determinista).
+
+Asumiendo que no hay ningún estado trampa (éstos se pueden eliminar, y agregar uno nuevo si se requiere que el autómata sea completo), cada estado acepta alguna cadena que todos los demás no, y por ende es distinguible de los demás. Esto implica que es mínimo.
