@@ -1,0 +1,71 @@
+\section{Gramáticas Libres de Contexto}
+
+Como se mencionó anteriormente, una \textbf{gramática libre de contexto} $G = \langle V_N, V_T, P, S \rangle$ en la cual todas las producciones son de la forma:
+$$
+    A \to \alpha, \text{ con } A \in V_N, \alpha \in (V_N \cup V_T)^*
+$$
+
+La relación de derivación $\deriv: (V_N \cup V_T)^* \times (V_N \cup V_T)^*$ de una gramática $G$ está definida en base a las transiciones: si $\alpha, \beta, \gamma_1, \gamma_2 \in (V_N \cup V_T)^*$ con $\alpha \to \beta \in P$, se tiene
+$$
+    \gamma_1 \alpha \gamma_2 \deriv \gamma_1 \beta \gamma_2
+$$
+
+Una \textbf{forma sentencial} de $G$ es una cadena $\alpha \in (V_N \cup V_T)^*$ tal que $S \derivs \alpha$. Luego, el \textbf{lenguaje aceptado} por $G$ se define como:
+$$
+    \L(G) := \{\alpha \in V_T^* \mid S \derivs \alpha\}
+$$
+
+\subsection{Equivalencia con Autómatas de Pila}
+
+Veamos que las gramáticas libres de contexto tienen el mismo poder expresivo que los autómatas de pila.
+
+\subsubsection{GLC $\implies$ Autómata de Pila}
+
+\begin{theorem*}
+    Para cada gramática libre de contexto $G = \langle V_N, V_T, P, S \rangle$, existe un autómata de pila $M$ tal que $\L(G) = \L_\lambda(M)$.
+\end{theorem*}
+\begin{proof}
+    Tomemos el autómata $M = \langle Q, \Sigma, \Gamma, \delta, q_0, Z_0 \rangle$, donde:
+    \begin{itemize}
+        \item $Q = \{q\}$
+        \item $\Sigma = V_T$
+        \item $\Gamma = (V_T \cup V_N)$
+        \item $\delta$ está dada por las siguientes reglas:
+        \begin{itemize}
+            \item $\forall (A \to \alpha) \in P, \ (q, \alpha) \in \delta(q, \lambda, A)$
+            \item $\forall a \in V_T,\ \delta(q, a, a) = \{(q, \lambda)\}$
+        \end{itemize}
+        \item $q_0 = q$
+        \item $Z_0 = S$
+    \end{itemize}
+
+    Como resultado intermedio, veamos que $A \derivs w \iff (q, w, A) \overset{*}{\vdash} (q, \lambda, \lambda)$, por inducción completa en la cantidad de derivaciones $k$:
+    \begin{itemize}
+        \item \textbf{Caso Base}: en $k = 1$, denotando w = $a_1 \cdots a_k$, $A \deriv w$ si y sólo si $A \to w \in P$, y esto a su vez se da si y sólo si $(q, a_1 \cdots a_k, A) \vdash (q, a_1 \cdots a_k, a_1 \cdots a_k) \overset{k}{\vdash} (q, \lambda, \lambda)$.
+        \item \textbf{Paso Inductivo}: en $k > 1$, nuestra hipótesis inductiva será que la propiedad vale para todo $j < k$.
+        
+            Luego, $A \overset{k}{\deriv} w \iff A \to X_1 \cdots X_n \in P$, con $X_i \overset{k_i}{\deriv} x_i$ tal que $w = x_1 \cdots x_n$ y $\sum_{i = 1}^n k_i = k$. Además, alguno de los $k_i$ es al menos $1$ (porque $k > 1$), así que $k_i < k\ \forall i$.
+
+            Por la definición de $M$, $A \to X_1 \cdots X_n \in P \iff (q, w, A) \vdash (q, w, X_1 \cdots X_n)$. Consideremos cada símbolo $X_i$:
+            \begin{itemize}
+                \item Si $X_i \in V_N$, entonces la hipótesis inductiva indica que $X_i \to x_i \in P \iff (q, x_i, X_i) \overset{*}{\vdash} (q, \lambda, \lambda)$.
+                \item Si $X_i = x_i \in V_T^*$, entonces $(q, x_i, X_i) = (q, x_i, x_i) \overset{*}{\vdash} (q, \lambda, \lambda)$.
+            \end{itemize}
+
+            Por ende, se tiene que:
+            $$
+            \begin{aligned}
+                A \to X_1 \cdots X_n \in P & \iff (q, w, A) \vdash (q, x_1 \cdots x_n, X_1 \cdots X_n) \\
+                & \overset{*}{\vdash} (q, x_2 \cdots x_n, X_2 \cdots X_n) \\
+                & \qquad \vdots \\
+                & \overset{*}{\vdash} (q, \lambda, \lambda)
+            \end{aligned}
+            $$
+    \end{itemize}
+
+    En particular, se tiene que $w \in \L(G) \iff S \derivp w \iff (q, w, S) \overset{*}{\vdash} (q, \lambda, \lambda) \iff w \in \L(M)$.
+\end{proof}
+
+\subsubsection{Autómata de Pila $\implies$ GLC}
+
+\textbf{TODO}
