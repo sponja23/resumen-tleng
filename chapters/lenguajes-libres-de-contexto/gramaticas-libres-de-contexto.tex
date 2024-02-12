@@ -68,4 +68,101 @@ Veamos que las gramáticas libres de contexto tienen el mismo poder expresivo qu
 
 \subsubsection{Autómata de Pila $\implies$ GLC}
 
-\textbf{TODO}
+\begin{theorem*}
+    Para todo autómata de pila $M = \langle Q, \Sigma, \Gamma, \delta, q_0, Z_0 \rangle$, el lenguaje $\L_\lambda(M)$ es libre de contexto.
+\end{theorem*}
+\begin{proof}
+    Se toma la gramática $G = \langle V_N, V_T, P, S \rangle$, donde:
+    \begin{itemize}
+        \item $S$ es un símbolo nuevo.
+        \item $V_N := \{[q, A, p] \mid q, p \in Q, A \in \Gamma\} \cup \{S\}$.
+        \item $V_T := \Sigma$.
+        \item $P$ está definido por las siguientes reglas:
+        \begin{itemize}
+            \item $\forall q \in Q$:
+            $$
+                S \to [q_0, Z_0, q] \in P
+            $$
+            \item $\forall q, p \in Q, a \in \Sigma \cup \{\lambda\}, A \in \Gamma$:
+            $$
+                [q, A, p] \to a \in P \iff (p, \lambda) \in \delta(q, a, A)
+            $$
+            \item $\forall q, q_1, \dots, q_{m + 1} \in Q, a \in \Sigma \cup \{\lambda\}, A \in \Gamma$:
+            $$
+                [q, A, q_{m+1}] \to a[q_1, B_1, q_2] \cdots [q_m, B_m, q_{m + 1}] \in P \iff (q_1, B_1 \cdots B_m) \in \delta(q, a, A)
+            $$
+        \end{itemize}
+    \end{itemize}
+
+    La idea es que cada derivación más a la izquierda de $G$ es una \textbf{simulación} de la ejecución de $M$. Veamos que, para todo $q, p \in Q, A \in \Gamma, x \in \Sigma^*$, se tiene:
+    $$
+        (q, x, A) \vdash^* (p, \lambda, \lambda) \iff [q, A, p] \derivs x
+    $$
+
+    \begin{itemize}
+        \item $\implies$) La demostración será por inducción completa en la cantidad de transiciones de $M$:
+        \begin{itemize}
+            \item \textbf{Caso Base}: Si $(q, x, A) \vdash (p, \lambda, \lambda)$, es porque $|x| = 1$ o $|x| = 0$:
+            \begin{itemize}
+                \item $|x| = 0$: en tal caso, $x = \lambda$, y por ende $(q, \lambda, A) \vdash (p, \lambda, \lambda) \iff (p, \lambda) \in \delta(q, \lambda, A) \iff [q, A, p] \to \lambda \in P$. Luego, se tiene $[q, A, p] \deriv \lambda$.
+                \item $|x| = 1$: ídem anterior, $x = a$ implica que $(q, a, A) \vdash (p, \lambda, \lambda) \iff (p, \lambda) \in \delta(q, a, A) \iff [q, A, p] \to a \in P$, y entonces $[q, A, p] \deriv a$.
+            \end{itemize}
+            \item \textbf{Paso Inductivo}: asumamos que la implicación vale para todo $j < i$. Luego, se tiene $x = a \cdot y$, donde $a \in \Sigma \cup \{\lambda\}$ e $y \in \Sigma^*$, y se cumple $(q, x, A) \vdash^i (p, \lambda, \lambda)$. La ejecución se da de la siguiente manera:
+            $$
+                (q, ay, A) \vdash (q_1, y, B_1 \cdots B_m) \vdash^{i - 1} (p, \lambda, \lambda)
+            $$
+
+            Por otro lado, la cadena $y$ se puede descomponer en subcadenas $y = y_1 \cdots y_k$ donde para cada $j$, la cadena $y_1 \cdots y_j$ deja al símbolo $B_j$ en el tope de la pila. Estas cadenas van pasando por los estados intermedios $q_2, \dots, q_{m + 1}$ de forma tal que:
+            $$
+                (q_j, y_j, B_j) \vdash^{i_j} (q_{j + 1}, \lambda, \lambda)
+            $$
+
+            Como $\sum_{j = 1}^m i_j = i - 1$, todos los $i_j$ son menores que $i$, y entonces por hipótesis inductiva se tiene que:
+            $$
+                (q_j, y_j, B_j) \vdash^{i_j} (q_{j + 1}, \lambda, \lambda) \implies [q_j, B_j, q_{j + 1}] \derivs y_j
+            $$
+
+            Tomando la producción $[q, A, q_{m + 1}] \to a [q_1, B_1, q_2] \cdots [q_m, B_m, B_{m + 1}]$, se puede ver que:
+            $$
+            \begin{aligned}\relax
+                [q, A, q_{m + 1}] & \deriv a [q_1, B_1, q_2] \cdots [q_m, B_m, q_{m + 1}] \\
+                & \derivs a y_1 [q_2, B_2, q_3] \cdots [q_m, B_m, q_{m + 1}] \\
+                & \qquad \qquad \vdots \\
+                & \derivs a y_1 \cdots y_m = a y = x
+            \end{aligned}
+            $$
+        \end{itemize}
+        \item $\impliedby$) La demostración será por inducción completa en la cantidad de derivaciones:
+        \begin{itemize}
+            \item \textbf{Caso Base}: Si $[q, A, p] \deriv x$, entonces $x = a$ para algún $a \in \Sigma \cup \{\lambda\}$, y se tiene $[q, A, p] \to a \in P$ que, por la definición de $G$, implica que $(p, \lambda) \in \delta(q, a, A)$. Esto quiere decir que $(q, a, A) \vdash (p, \lambda, \lambda)$.
+            \item \textbf{Paso Inductivo}: Supongamos que la implicación vale para cualquier $j < i$, y que $[q, A, p] \overset{i}{\deriv} x$. Luego, como es más de una derivación, la primera derivación utilizada debe ser de la tercera forma, es decir,
+            $$
+                [q, A, p] \deriv a [q_1, B_1, q_2] \cdots [q_m, B_m, p] \overset{i - 1}{\deriv} x
+            $$
+            La cadena $x$ se puede descomponer en las subcadenas $x = a x_1 \cdots x_m$ de forma tal que para cada $j$, se tiene $[q_j, B_j, q_{j + 1}] \overset{i_j}{\deriv} x_j$ con $i_j < i$ (porque $\sum_{j = 1}^m i_j = i$). Por hipótesis inductiva, esto implica que $(q_j, x_j, B_j) \vdash^* (q_{j + 1}, \lambda, \lambda)$. Además, como siempre podemos agregar símbolos al fondo de la pila y agregar símbolos al final de la entrada sin cambiar el funcionamiento, se tiene que:
+            $$
+                (q_j, x_j \cdots x_m, B_j \cdots B_m) \vdash^* (q_j, x_{j + 1} \cdots x_m, B_{j + 1} \cdots B_m)
+            $$
+
+            Luego, sabiendo que $[q, A, p] \deriv a [q_1, B_1, q_2] \cdots [q_m, B_m, p] \in P$, se debe tener una transición $(q_1, B_1 \cdots B_m) \in \delta(q, a, A)$ (por definición de $G$), y por ende:
+            $$
+                \begin{aligned}
+                    (q, x, A) & \vdash (q_1, x_1 \cdots x_m, B_1 \cdots B_m) \\
+                    & \vdash^* (q_2, x_2 \cdots x_m, B_2 \cdots B_m) \\
+                    & \qquad \qquad \vdots \\
+                    & \vdash^* (p, \lambda, \lambda)
+                \end{aligned}
+            $$
+        \end{itemize}
+    \end{itemize}
+
+    Sabiendo ese lema, se puede ver que, en particular:
+    $$
+        x \in \L_\lambda(M) \iff (q_0, x, Z_0) \vdash^* (p, \lambda, \lambda) \iff [q_0, Z_0, p] \derivs x
+    $$
+
+    Como además $S \to [q_0, Z_0, p]$, se tiene:
+    $$
+        x \in \L_\lambda(M) \iff S \derivs x \iff x \in \L(G)
+    $$
+\end{proof}
