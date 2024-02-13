@@ -150,6 +150,7 @@ Obviamente, cualquier AFND puede ser interpretado como un AFND-$\lambda$. Lo sor
 La construcción realizada en la demostración puede ser adaptada fácilmente a un algoritmo que elimina las transiciones lambda de un autómata dado. Una implementación \textit{naïve}, que recorre todos los estados y explora las clausuras lambda correspondientes, tendría una complejidad temporal acotada por $\BigO{|Q|^2}$.
 
 \subsection{Equivalencia con AFDs}
+\label{equivalencia-afd-afnd}
 
 Es fácil ver que a partir de un AFD $M$ se puede construir un AFND $M'$ equivalente tomando $\delta'(q, a) = \{\delta(q, a)\}$. A continuación, veremos que a partir de un AFND se puede construir un AFD equivalente:
 

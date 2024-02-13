@@ -1,0 +1,11 @@
+\section{Autómatas de Pila Determinísticos}
+
+Un autómata de pila $M = \langle Q, \Sigma, \Gamma, \delta, q_0, Z_0, F \rangle$ se considera \textbf{determinístico} cuando, para cada $a \in \Sigma, q \in Q, Z \in \Gamma$, se cumple alguna de:
+\begin{itemize}
+    \item $|\delta(q, a, Z)| \leq 1$, y $|\delta(q, \lambda, Z)| = 0$.
+    \item $|\delta(q, a, Z)| = 0$ para todo $a$, y $|\delta(q, \lambda, Z)| \leq 1$.
+\end{itemize}
+
+Es decir, cada par (estado, símbolo de pila) puede o bien tener transiciones en algunos símbolos de entrada, o no tener ninguna de esas transiciones, teniendo en cambio alguna transición-$\lambda$.
+
+\hyperref[equivalencia-afd-afnd]{A diferencia de los autómatas finitos}, los APDs no tienen el mismo poder expresivo que los autómatas de pila generales.

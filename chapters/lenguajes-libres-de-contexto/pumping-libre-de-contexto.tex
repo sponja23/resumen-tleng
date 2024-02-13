@@ -1,0 +1,18 @@
+\section{Lema de Pumping Libre de Contexto}
+
+Existe una versión análoga al \hyperref[pumping-regulares]{lema de pumping de los lenguajes regulares}, esta vez para los lenguajes libres de contexto:
+
+\begin{theorem*}
+    Para cualquier lenguaje $L \subseteq \Sigma^*$ libre de contexto, existe una constante de pumping $p > 0$ tal que, para toda cadena $\alpha \in \Sigma^*$ con $|\alpha| \geq p$, se tiene una factorización $\alpha = r x y z s$ tal que:
+    \begin{itemize}
+        \item $|xyz| \leq n$
+        \item $|xz| \geq 1$
+        \item $\forall i \geq 0,\ r x^i y z^i s \in L$
+    \end{itemize}
+\end{theorem*}
+
+Demostrar esta versión del lema de pumping es más complicado que la de los lenguajes regulares, y requiere entender el concepto de \textbf{árbol de derivación}.
+
+\subsection{Árboles de Derivación}
+
+
