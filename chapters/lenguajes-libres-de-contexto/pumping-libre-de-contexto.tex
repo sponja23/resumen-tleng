@@ -15,4 +15,106 @@ Demostrar esta versión del lema de pumping es más complicado que la de los len
 
 \subsection{Árboles de Derivación}
 
+Dada una gramática libre de contexto $G = \langle V_N, V_T, P, S \rangle$ y una cadena $\alpha \in V_T^*$, un \textbf{árbol de derivación} es un árbol tal que:
+\begin{itemize}
+    \item Cada vértice está etiquetado con un elemento de $V_N \cup V_T \cup \lambda$.
+    \item La raíz tiene como etiqueta a $S$.
+    \item Los vértices interiores están etiquetados con un símbolo de $V_N$.
+    \item Para todo vértice interior con etiqueta $A$ e hijos con etiquetas $X_1, \dots, X_k$, la gramática debe tener una producción $A \to X_1 \cdots X_k \in P$.
+    \item Las hojas están etiquetadas con símbolos de $V_T \cup \lambda$.
+    \item Los vértices con etiqueta $\lambda$ son el único hijo de un padre con etiqueta $A$, y por la regla anterior se debe tener $A \to \lambda$.
+    \item Un recorrido in-order por las hojas $h_1, \dots, h_m$ del árbol debe res ultar en la cadena $h_1 \cdots h_m = \alpha$.
+\end{itemize}
 
+Por ejemplo, tomemos la gramática $G = \langle \{\{E, T, F\}, \{\mathop{+}, \mathop{*}, \textbf{id}, \textbf{const}, \mathrm{(}, \mathrm{)}\}, P, E\}$ con $P$ dado por:
+$$
+    \begin{aligned}
+        E & \to E + T \mid T                             \\
+        T & \to T * F \mid F                             \\
+        F & \to \textbf{id} \mid \textbf{const} \mid (E)
+    \end{aligned}
+$$
+
+Un árbol de derivación para la cadena $\alpha = \textbf{id} + \textbf{id} * \textbf{id}$ sería (en este caso, es único):
+\begin{figure}[H]
+    \centering
+    \includegraphics*[width=0.4\textwidth]{árbol-de-derivación.png}
+    \caption*{Árbol de derivación para $\textbf{id} + \textbf{id} * \textbf{id}$.}
+\end{figure}
+
+Un \textbf{camino} de $X$ en un árbol con raíz en $A$, denotado $\mathcal T(A)$ es una secuencia de símbolos $A, X_1, \dots, X_k, X$ que corresponde a las etiquetas de una rama de $\mathcal T(A)$. Luego la \textbf{altura} de $\mathcal T(A)$ está definida como:
+$$
+    \max \{|\alpha| \mid \exists x \in V_T : \alpha x \text{ es camino de } \mathcal T(A)\}
+$$
+
+\subsubsection{Cota Basada en Altura de Árbol de Derivación}
+
+El siguiente lema establece una relación entre la longitud de una cadena y la altura máxima de un árbol de derivación para la misma:
+
+\begin{lemma*}
+    Sea $G = \langle V_N, V_T, P, S \rangle$ una gramática libre de contexto, y $\alpha \in (V_N \cup V_T)^*$ tal que $\alpha \in \L(G)$. Para todo árbol de derivación $\mathcal T(S)$ que genera a $\alpha$ con altura $h$, sea:
+    $$
+        a = \max\{k \mid (\exists A \to \beta \in P : \beta \neq \lambda \land k = |\beta|) \lor (\exists A \to \lambda \in P \land k = 1)\}
+    $$
+
+    Luego, $|\alpha| \leq a^h$.
+\end{lemma*}
+\begin{proof}
+    La constante $a$ es básicamente la cantidad máxima de símbolos que puede tener el cuerpo de una producción de $G$. Por la construcción de los árboles de derivación, este es el grado máximo que puede tener cada nodo interior. Como un árbol $a$-ario de altura $h$ completo tiene $a^h$ hojas, esta es la longitud máxima que puede tener una cadena generada por éste.
+\end{proof}
+
+\subsection{Demostración}
+
+\begin{proof}
+    Sea $G = \langle V_N, V_T, P, S \rangle$ una gramática libre de contexto. Definamos $a$ como la cantidad máxima de nodos en el cuerpo de cada producción de $G$:
+    $$
+        a := \max\ \{2\} \cup \{|\beta| \mid A \to \beta \in P\}
+    $$
+
+    Tomemos como constante de pumping al valor $p = a^{|V_N| + 1}$. Luego, sea $\alpha \in \L(G)$ una cadena con longitud $|\alpha| \geq p$ y $\mathcal T(S)$ un árbol de derivación para la misma mínimo en cantidad de nodos.
+    
+    Si el árbol $\mathcal T(S)$ tiene altura $h$ entonces, por el lema anterior, $a^h \geq |\alpha|$. Además, como $|\alpha| \geq p = a^{|V_N| + 1}$, se tiene que $a^h \geq a^{|V_N| + 1} \iff h \geq |V_N| + 1$.
+    
+    Entonces, por la definición de altura, hay algún camino de terminales $S, X_1, \dots, X_h$ dentro del árbol. Como $h > |V_N|$, por el principio del palomar, debe haber algún símbolo repetido en ese camino. Sea $A$ el primer símbolo que se repite recorriendo el camino de atrás para adelante.
+
+    Consideremos la primera y la segunda aparición de $A$ al recorrer el árbol de abajo hacia arriba:
+    \begin{figure}[H]
+        \centering
+        % TODO: Hacer una mejor imagen
+        \includegraphics*[width=0.4\textwidth]{árbol-de-derivación-pumping.png}
+        \caption*{Árbol de derivación con el símbolo repetido $A$.}
+    \end{figure}
+
+    Como se puede ver en la ilustración, la cadena $\alpha$ se descompone como $\alpha = r x y z s$, donde:
+    \begin{itemize}
+        \item $r$ es la cadena generada por los símbolos anteriores a la segunda $A$ en el árbol.
+        \item $x$ es la cadena generada por el segundo subárbol enraizado en $A$ con símbolos antes de la segunda $A$.
+        \item $y$ es la cadena generada por el primer subárbol enraizado en $A$.
+        \item $z$ es la cadena generada por el segundo subárbol enraizado en $A$ con símbolos después de la segunda $A$.
+        \item $s$ es la cadena generada por los símbolos posteriores a la segunda $A$ en el árbol.
+    \end{itemize}
+
+    Como $A$ es el primer símbolo que se repite, todas las ramas del subárbol $\mathcal T(A)$ tienen a lo sumo $|V_N + 1|$ vértices (si no, se repetirían más etiquetas), así que tiene altura $|V_N| + 1$ y por ende:
+    $$
+        |xyz| \leq a^{|V_N| + 1} = p
+    $$
+
+    Además, $x$ y $z$ no pueden ser ambos nulos, porque si no el árbol de derivación para $\alpha$ no sería mínimo en cantidad de nodos: se podría eliminar el árbol entre ambas $A$ y usar sólo la producción de la primera. Esto implica que:
+    $$
+        |xz| \geq 1
+    $$
+
+    Como se puede ver en árbol de derivación, se tiene:
+    $$
+    \begin{aligned}
+        S & \derivs rAs \\
+        A & \derivs xAz \\
+        A & \derivs y
+    \end{aligned}
+    $$
+
+    Estas producciones implican que $S \derivs r x^i y z^i s$ para cualquier $i \geq 0$. Por ende, tenemos que:
+    $$
+        \forall i \geq 0,\ r x^i y z^i s \in \L(G)
+    $$
+\end{proof}
