@@ -1,0 +1,54 @@
+\section{Cota en la Cantidad de Derivaciones}
+
+En esta sección se establecerá una cota en la cantidad de derivaciones que puede tomar una gramática en llegar a una cadena dada.
+
+\subsection{Derivación más a la Izquierda/Derecha}
+
+Dada una gramática libre de contexto $G = \langle V_N, V_T, P, S \rangle$ y una cadena $w \in \L(G)$ una \textbf{derivación más a la izquierda} de $w$ es una tal que en cada paso con forma sentencial $X_1 \cdots X_k$ se aplica una derivación sobre el primer $X_i$ no-terminal. Análogamente, una derivación más a la derecha es una en la cual siempre se aplica una derivación sobre el último $X_i$ no-terminal.
+
+Por otro lado, un \textbf{árbol de derivación más a la izquierda/derecha} es un árbol de derivación que corresponde a una derivación más a la izquierda/derecha.
+
+\subsection{Recursiva a Izquierda/Derecha}
+
+Una gramática es \textbf{recursiva a izquierda} cuando hay algún símbolo $A \in V_N$ y cadena $\alpha \in (V_T \cup V_N)^*$ tal que $A \overset{+}{\derivL} A \alpha$. Análogamente, una gramática es \textbf{recursiva a derecha} cuando se puede derivar $A \overset{+}{\derivR} \alpha A$.
+
+\subsection{Demostración de la Cota}
+
+Podemos enunciar y demostrar la cota en la cantidad de derivaciones:
+
+\begin{theorem*}
+    Sea $G = \langle V_N, V_T, P, S \rangle$ libre de contexto y no recursiva a izquierda. Luego, existe alguna constante $c$ tal que si $A \overset{i}{\derivL} w B \alpha$ con $w \in V_T^*, |w| = n$ entonces $i \leq c^{n + 2}$.
+\end{theorem*}
+\begin{proof}
+    Denotamos $k = |V_N|$, y $\mathcal T(A)$ al árbol de derivación más a la izquierda correspondiente a $A \overset{i}{\derivL} w B \alpha$.
+    \begin{figure}[H]
+        \centering
+        \includegraphics*[width=0.4\textwidth]{árbol-de-derivación-más-a-la-izquierda.png}
+        \caption*{Árbol de derivación para $A \overset{i}{\derivL} w B \alpha$.}
+    \end{figure}
+
+    Sea $n_0$ el nodo con la etiqueta $B$ en el árbol. Luego, todas las ramas a la derecha de la de este nodo deben ser más cortas: si no, se habría aplicado alguna derivación a un símbolo posterior a $B$ antes que a éste, lo cual está prohibido por ser ésta una derivación más a la izquierda.
+
+    Supongamos que hay alguna rama de longitud mayor a $k (n + 2)$ arcos. Luego, como todas las ramas a la derecha de $n_0$ tienen longitud menor a ésta, debe haber alguna rama con longitud mayor a $k (n + 2)$ que llega a $n_0$ o algún nodo a su izquierda. Además, por su ubicación, las hojas de esta rama deben formar alguna cadena $x$ contenida en $wB$.
+
+    Consideremos segmentos de longitud $k$ en esta rama $S_1, \dots, S_{n + 2}$. Cada uno de ellos contiene nodos que derivan en hojas, pero cada hoja tiene un único ancestro más bajo en la rama\footnote{Éste es el ancestro que se ubica en el nivel más bajo del árbol, dentro de los que están en la rama. Por ejemplo, todos los nodos tienen como ancestro a la raíz, pero es posible que algunos sean descendientes de nodos que están más abajo (pero dentro de la rama).}. Sea $f: \{S_1, \dots S_{n + 2}\} \to \mathcal P(\textsc{Símbolos}(x))$ la función definida como:
+    $$
+        f(S_i) := \{a \in \textsc{Símbolos(x)} \mid \exists n \in S_i : n \text{ es el ancestro más bajo de } a\}
+    $$
+
+    Como la cadena $x$ está contenida en $wB$, tiene longitud de a lo sumo $|wB| = n + 1$. Al haber $n + 2$ segmentos, debe haber algún $S_i = n_1, \dots, n_k$ tal que $f(S_i) = \emptyset$ (por el principio del palomar).  
+    
+    Para cada $n_j$ de $S_i$, todos sus descendientes directos anteriores a $n_{j + 1}$ deben ser $\lambda$ o símbolos anulables, porque si no $n_j$ sería el antecesor más bajo de algún símbolo de $x$. Además, como hay $k$ símbolos no terminales, debe haber algún par de nodos con la misma etiqueta $X$. Es decir, la gramática incluye la derivación $X \derivp Y_1 \cdots Y_m X \gamma$ con $Y_1, \dots, Y_m$ anulables ($Y_j \derivs \lambda$), así que:
+    $$
+        X \derivp Y_1 \cdots Y_m X \gamma \derivp X \gamma
+    $$
+
+    Esto es absurdo, porque $G$ no es recursiva a izquierda.
+
+    Sabiendo que todas las ramas del árbol longitud de a lo sumo $k (n + 2)$, esta es la altura máxima del árbol $\mathcal T(A)$. Llamemos $\ell$ a la longitud máxima del cuerpo de una producción:
+    $$
+        \ell = \max \{ |\beta| \mid A \to \beta \in P \}
+    $$
+
+    Luego, como un árbol $\ell$-ario de altura $k (n + 2)$ tiene a lo sumo $\ell^{k (n + 2)}$. Por ende, si $A \overset{i}{\derivL} w B \alpha$, entonces $i \leq \ell^{k (n + 2)}$. Basta con tomar $c = \ell^k$.
+\end{proof}
