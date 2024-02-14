@@ -1,0 +1,66 @@
+\section{Algoritmos de Decisión}
+
+En esta sección formularemos algoritmos para determinar propiedades sobre gramáticas libres de contexto.
+
+\subsection{Finitud}
+
+Para determinar si un algoritmo libre de contexto es finito, se puede usar el siguiente algoritmo, donde $p$ es la constante de pumping del lenguaje:
+
+\begin{algorithm}[H]
+    \caption{Determinar si una gramática libre de contexto es finita.}
+    \label{glc-finita}
+    \begin{algorithmic}[1]
+        \Procedure{EsFinito}{$G = \langle V_T, V_N, P, S \rangle$}
+        \If{$\exists x \in \bigcup_{k = p}^{2p - 1} \Sigma^k \mid x \in \L(G)$}
+        \State \Return \texttt{false}
+        \Else
+        \State \Return \texttt{true}
+        \EndIf
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+El algoritmo consiste en verificar si el lenguaje contiene alguna cadena con longitud entre $p$ y $2p - 1$. Esto es porque, gracias al \hyperref[pumping-libre-de-contexto]{lema de pumping}, el lenguaje tiene infinitas cadenas si y solo si tiene alguna cadena en el rango. Veamos por qué:
+\begin{itemize}
+    \item $\implies$) Asumamos que $\L(G)$ es infinito. Luego, debe tener alguna palabra $w \in \L(G)$ con longitud de al menos $2p$ (porque las cadenas de longitud acotada son finitas). Por el lema de pumping, podemos ir eliminando símbolos de $w$ hasta llegar a una cadena de longitud menor a $2p - 1$ (pero mayor a $p$, porque siempre eliminamos a lo sumo $p$ símbolos).
+    \item $\impliedby$) Si hay una cadena $w \in \L(G)$ con $|w| \geq p$, entonces se puede descomponer en $w = rxyzs$. Como $|xz| \geq 1$ y $\forall i \geq 0, rx^iyz^is \in \L(G)$, el lenguaje tiene infinitas cadenas.
+\end{itemize}
+
+\subsection{Vacuidad}
+
+Un posible algoritmo para determinar si una gramática es vacía es el siguiente (de nuevo, $p$ es la constante de pumping del lenguaje):
+\begin{algorithm}[H]
+    \caption{Determinar si una gramática libre de contexto es vacía.}
+    \label{glc-vacia}
+    \begin{algorithmic}[1]
+        \Procedure{EsVacía}{$G = \langle V_T, V_N, P, S \rangle$}
+        \If{$\exists x \in \bigcup_{k = 0}^{p} \Sigma^k \mid x \in \L(G)$}
+        \State \Return \texttt{false}
+        \Else
+        \State \Return \texttt{true}
+        \EndIf
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+Este algoritmo verifica si hay alguna cadena de longitud menor o igual a $p$ en el lenguaje. Esto es porque, gracias al lema de pumping, si hay una cadena con longitud mayor a $p$, también debe haber una con longitud menor o igual.
+
+Otra opción es el siguiente algoritmo:
+
+\begin{algorithm}[H]
+    \caption{Determinar si una gramática libre de contexto es vacía.}
+    \label{glc-vacia2}
+    \begin{algorithmic}[1]
+        \Procedure{EsVacía2}{$G = \langle V_T, V_N, P, S \rangle$}
+        \State $V_0 \gets \emptyset$
+        \State $i \gets 0$
+        \Repeat
+        \State $i \gets i + 1$
+        \State $N_i \{A \mid A \to \alpha \in P, \alpha \in (N_{i - 1} \cup V_T)^*\} \cup \{N_{i - 1}\}$
+        \Until{$N_i = N_{i - 1}$}
+        \State \Return $S \notin N_i$
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+Este algoritmo computa el conjunto de símbolos no-terminales que derivan en alguna cadena de símbolos terminales. Si el símbolo inicial $S$ está en ese conjunto, hay alguna cadena $\alpha \in V_T^*$ tal que $S \derivp \alpha$, así que el lenguaje no está vacío.

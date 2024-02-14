@@ -1,0 +1,57 @@
+\section{Propiedades de Clausura de Lenguajes Libres de Contexto}
+
+\subsection{Unión}
+
+\begin{theorem*}
+    Sean $\L_1, \L_2 \subseteq V_T^*$ lenguajes libres de contexto. Su unión $\L_1 \cup \L_2$ es libre de contexto.
+\end{theorem*}
+\begin{proof}
+    Sean $G_1 = \langle V_T, V_{N_1}, P_1, S_1 \rangle$ y $G_2 = \langle V_T, V_{N_2}, P_2, S_2 \rangle$ gramáticas libres de contexto para los lenguajes $\L_1$ y $\L_2$. Luego, se puede tomar la gramática $G = \langle V_T, \{S\} \cup V_{N_1} \cup V_{N_2}, P_1 \cup P_2 \cup \{S \to S_1, S \to S_2\}, S \rangle$. Veamos que $w \in \L(G) \iff w \in \L_1 \lor w \in \L_2$:
+    \begin{itemize}
+        \item $\implies$) Si $w \in \L(G)$, entonces debe existir alguna derivación $S \underset{G}{\derivp} w$. Como las únicas 2 derivaciones con cabeza $S$ son $S \to S_1$ y $S \to S_2$, se debe dar $S_1 \underset{G}{\derivp} w \lor S_2 \underset{G}{\derivp} w$. Además, como $S_1$ solo participa en derivaciones de $P_1$, y lo mismo sucede para $S_2$ esto quiere decir que $S_1 \underset{G_1}{\derivp} w$ o $S_2 \underset{G_2}{\derivp} w$. Por ende, $w \in \L_1 \lor w \in \L_2$.
+        \item $\impliedby$) Si $w \in \L_1 \lor w \in L_2$, se tiene que $S_1 \underset{G_1}{\derivp} w$ o $S_2 \underset{G_2}{\derivp} w$. Como las producciones de ambas gramáticas están contenidas en las producciones de $G$, también se tiene que $S_1 \underset{G}{\derivp} w \lor S_2 \underset{G}{\derivp} w$. Gracias a las producciones $S \to S_1$ y $S \mid S_2$, en ambos casos se tiene $S \underset{G}{\derivp} w$.
+    \end{itemize}
+\end{proof}
+
+\subsection{Concatenación}
+
+\begin{theorem*}
+    Sean $\L_1, \L_2 \subseteq V_T^*$ lenguajes libres de contexto. Su concatenación $\L_1 \cdot \L_2$ es libre de contexto.
+\end{theorem*}
+\begin{proof}
+    La demostración es análoga a la de la unión: tomamos las gramáticas $G_1 = \langle V_T, V_{N_1}, P_1, S_1 \rangle$ y $G_2 = \langle V_T, V_{N_2}, P_2, S_2 \rangle$ para los lenguajes $\L_1$ y $\L_2$, y construimos una nueva gramática $G = \langle V_T, \{S\} \cup V_{N_1} \cup V_{N_2}, P_1 \cup P_2 \cup \{S \to S_1 S_2\}, S \rangle$, que es libre de contexto y cumple que $w \in \L(G) \iff w \in \L_1 \cdot \L_2$.
+\end{proof}
+
+\subsection{Clausura de Kleene}
+
+\begin{theorem*}
+    Sea $\L \subseteq V_T^*$ un lenguaje libre de contexto. Su clausura de Kleene $\L^*$ es libre de contexto.
+\end{theorem*}
+\begin{proof}
+    Al igual que en los teoremas anteriores, se demuestra tomando una gramática libre de contexto $G = \langle V_T, V_N, P, S \rangle$ para $\L$ y construyendo una de la forma $G' = \langle V_T, \{S'\} \cup V_N, P \cup \{S' \to S S', S' \to \lambda\}, S' \rangle$. Esta nueva gramática cumple que $w \in \L(G') \iff w \in \L^*$.
+\end{proof}
+
+\subsection{Reverso}
+
+\begin{theorem*}
+    Sea $\L \subseteq V_T^*$ un lenguaje libre de contexto. Su reverso $\L^*$ es libre de contexto.
+\end{theorem*}
+\begin{proof}
+    Dada una gramática libre de contexto $G = \langle V_T, V_N, P, S \rangle$ para $\L$, se puede tomar la gramática $G' = \langle V_T, V_N, P^R, S \rangle$, donde $P^R = \{A \to \beta^R \mid A \to \beta \in P\}$.
+\end{proof}
+
+\subsection{Intersección con Lenguaje Regular}
+
+\begin{theorem*}
+    Sea $\L \subseteq \Sigma^*$ libre de contexto y $R \subseteq \Sigma^*$ regular. Luego, la intersección $\L \cap R$ es libre de contexto
+\end{theorem*}
+\begin{proof}
+    Sea $M_L = \langle Q_L, \Sigma, \Gamma, \delta_L, q_{L_0}, Z_0, F_L \rangle$ un autómata de pila para $\L$, y sea $M_R = \langle Q_R, \Sigma, \delta_R, q_{R_0}, F_R \rangle$ un AFND para $R$. Luego, se puede tomar el autómata de pila definido por $M' = \langle Q', \Sigma, \Gamma, \delta', q_0', Z_0, F' \rangle$, donde:
+    \begin{itemize}
+        \item $Q' = Q_L \times Q_R$
+        \item $\delta'((q_L, q_R), a, t) = \{((p_L, p_R), s) \mid (p_L, s) \in \delta_L(q_L, a, t) \land p_R \in \delta_R(q_R, a)\}$
+        \item $F' = \{(q_L, q_R) \mid q_L \in F_L \land q_R \in F_R\}$
+    \end{itemize}
+
+    Luego, $w \in \L(M') \iff w \in \L \cap R$, así que $\L \cap R$ es libre de contexto.
+\end{proof}
