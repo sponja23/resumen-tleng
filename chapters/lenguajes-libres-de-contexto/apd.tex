@@ -83,4 +83,109 @@ Un autómata de pila determinístico $M = \langle Q, \Sigma, \Gamma, \delta, q_0
 
 \subsubsection{Demostración de Clausura}
 
+Para demostrar que cualquier LLCD $\L$ está clausurado por complemento, podemos construir un autómata que acepta $\L^c$:
 
+\begin{proof}
+    Sea $M = \langle Q, \Sigma, \Gamma, \delta, q_0, Z_0, F \rangle$ un APD continuo tal que $\L(M) = \L$. Luego, podemos tomar el autómata $M' = \langle Q', \Sigma, \Gamma, \delta', q_0', Z_0, F' \rangle$. El conjunto de estados $Q'$ está definido como:
+    $$
+        Q' = \{[q, k] \mid q \in Q \land k \in \{0, 1, 2\}\}
+    $$
+
+    El propósito del número $k$ es detectar si el autómata pasó o no por un estado final desde la última vez que consumió un símbolo. Específicamente:
+    \begin{itemize}
+        \item Los estados $[q, 0]$ indican que $M$ no pasó por ningún estado final desde la última vez que consumió un símbolo.
+        \item Los estados $[q, 1]$ indican que $M$ pasó por algún estado final desde la última vez que consumió un símbolo.
+        \item Los estados $[q, 2]$ son los finales, y el aútomata se mueve a éstos luego de pasar por una serie de transiciones-$\lambda$ sin estados finales (es decir, por estados de la forma $[p, 0]$).
+    \end{itemize}
+
+    Cuando $M$ está en un $[q, 0]$ y realiza una transición que lee de la entrada, pasa a un $[q, 2]$. Si la ejecución termina ahí, la cadena es aceptada, porque el autómata acaba de pasar por una serie de transiciones-$\lambda$ sin ningún estado final. Por otro lado, si se lee algún símbolo de la entrada, se pasa al estado $[p, 0]$ o $[p, 1]$ según la pertenencia de $p$ a $F$, y se realizan las transiciones-$\lambda$ correspondientes: los estados $[q, 1]$ siempre pasan a otros $[p, 1]$, pero los $[q, 0]$ pasan a $[p, 0]$ cuando $p \notin F$ y $[p, 1] \in F$.
+
+    Formalmente, la función de transición está definida por:
+    \begin{itemize}
+        \item Si $\delta(q, a, Z) = \{(p, \gamma)\}$, entonces:
+        $$
+            \delta'([q, 1], a, Z) = \delta'([q, 2], a, Z) =
+            \begin{cases}
+                \{([p, 0], \gamma)\} & \si p \notin F \\
+                \{([p, 1], \gamma)\} & \si p \in F
+            \end{cases}
+        $$
+
+        Por otro lado, como $\delta(q, a, Z) = \{(p, \gamma)\}$ y $M$ es determinístico, sabemos que $\delta(q, \lambda, Z) = \emptyset$, así que se puede definir la siguiente transición sin violar el determinismo:
+        $$
+            \delta'([q, 0], \lambda, Z) = \{([p, 2], Z)\}
+        $$
+
+        \item Si $\delta(q, \lambda, Z) = \{(p, \gamma)\}$, entonces:
+        $$
+        \begin{aligned}
+            \delta'([q, 2], \lambda, Z) & = \emptyset \\
+            \delta'([q, 1], \lambda, Z) & = \{([p, 1], \gamma)\} \\
+            \delta'([q, 0], \lambda, Z) & =
+            \begin{cases}
+                \{([p, 0], \gamma)\} & \si p \notin F \\
+                \{([p, 1], \gamma)\} & \si p \in F
+            \end{cases}
+        \end{aligned}
+        $$
+
+        Además, los estados finales y el inicial se definen como:
+        $$
+        \begin{aligned}
+            F & = \{[q, 2] \mid q \notin F\} \\
+            q_0' & =
+            \begin{cases}
+                [q_0, 0] & \si q_0 \notin F \\
+                [q_0, 1] & \si q_0 \in F
+            \end{cases}
+        \end{aligned}
+        $$
+    \end{itemize}
+\end{proof}
+
+\subsection{Otras Propiedades de Clausura}
+
+Los lenguajes libres de contexto determinístico están clausurados por:
+
+\begin{itemize}
+    \item \textbf{Complemento}.
+    \item $Pre(\L)$ (las cadenas que tienen un prefijo en $\L$).
+    \item $Min(\L)$ (las cadenas de $\L$ que \textbf{no tienen} prefijo propio en $\L$).
+    \item $Max(\L)$ (las cadenas de $\L$ que no son prefijos de otra cadena en $\L$).
+    \item Intersección con lenguaje regular (misma demostración que para LLC general).
+    \item Concatenación por derecha con lenguaje regular (se construye el autómata).
+\end{itemize}
+
+\subsection{No-Clausura}
+
+Los lenguajes libres de contexto determinístico \textbf{no están} clausurados por:
+
+\begin{itemize}
+    \item Intersección (misma demostración que para LLC general).
+    \item Unión (si estuvieran, como están clausurados por complemento, $\left(\L_1^c \cup L_2^c\right)^c = \L_1 \cap \L_2$ sería LLCD).
+    \item Reverso.
+    \item Concatenación.
+    \item Clausura de Kleene.
+\end{itemize}
+
+\subsection{Algoritmos de Decisión}
+
+Existen algoritmos para:
+
+\begin{itemize}
+    \item $\L \overset{?}{=} \emptyset$ (probar las cadenas de longitud menor a la constante de pumping, o computar el conjunto de símbolos de la gramática que derivan en cadenas)
+    \item $\L$ es finito? (probar las cadenas con longitud entre $p$ y $2p$)
+    \item $\L$ es infinito? (inverso al anterior)
+    \item $\L$ es co-finito? (es lo mismo que ``$\L^c$ es finito?'')
+    \item $\L = \Sigma^*$ (es lo mismo que $\L^c \overset{?}{=} \emptyset$)
+    \item $\L_1 \overset{?}{=} \L_2$
+    \item $w \in \L$ (en tiempo lineal)
+    \item $\L \overset{?}{=} R$
+    \item $\L \overset{?}{\subseteq} R$
+\end{itemize}
+
+No hay algoritmos para:
+\begin{itemize}
+    \item $\L_1 \overset{?}{\subseteq} \L_2$
+    \item $\L_1 \cap \L_2 \overset{?}{=} \emptyset$
+\end{itemize}

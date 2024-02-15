@@ -64,3 +64,15 @@ Otra opción es el siguiente algoritmo:
 \end{algorithm}
 
 Este algoritmo computa el conjunto de símbolos no-terminales que derivan en alguna cadena de símbolos terminales. Si el símbolo inicial $S$ está en ese conjunto, hay alguna cadena $\alpha \in V_T^*$ tal que $S \derivp \alpha$, así que el lenguaje no está vacío.
+
+\subsection{Problemas Incomputables}
+
+Si $\L$ es un lenguaje libre de contexto, no hay algoritmos para:
+\begin{itemize}
+    \item $L$ es regular?
+    \item $G$ libre de contexto es ambigua?
+    \item $\L_1 \overset{?}{=} \L_2$
+    \item $\L \overset{?}{=} \Sigma^*$
+    \item $\L_1 \overset{?}{\subseteq} \L_2$
+    \item $\L_1 \cap \L_2 \overset{?}{=} \emptyset$
+\end{itemize}
