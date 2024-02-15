@@ -8,4 +8,46 @@ Un autómata de pila $M = \langle Q, \Sigma, \Gamma, \delta, q_0, Z_0, F \rangle
 
 Es decir, cada par (estado, símbolo de pila) puede o bien tener transiciones en algunos símbolos de entrada, o no tener ninguna de esas transiciones, teniendo en cambio alguna transición-$\lambda$.
 
-\hyperref[equivalencia-afd-afnd]{A diferencia de los autómatas finitos}, los APDs no tienen el mismo poder expresivo que los autómatas de pila generales.
+\hyperref[equivalencia-afd-afnd]{A diferencia de los autómatas finitos}, los APDs no tienen el mismo poder expresivo que los autómatas de pila generales. Por ejemplo, el lenguaje $\mathcal L = \{ww^R \mid w \in \Sigma^*\}$ es libre de contexto\footnote{Se puede construir un autómata de pila no-determinístico que lo reconoce: este autómata tendría un alfabeto de pila $\Gamma$ que representa símbolos de $\Sigma$. Luego, debería apilar los símbolos correspondientes a los de $w$ a medida que lee la cadena, y transicionar no-determinísticamente a desapilarlos, validando que es equivalente al que se está leyendo de la entrada.}, pero no puede ser aceptado por un autómata de pila determinístico. Esto se puede ver considerando la cadena $0^n 11 0^n$: para que sea aceptada por un APD, éste debe usar la pila para validar que hay tantos $0$s antes del $11$ como después. Sin embargo, si luego recibiera la entrada $0^m 11 0^m$, ya no podría verificar si $n = m$, porque la pila se vació en el paso anterior.
+
+\subsection{Clausura por Complemento}
+
+A diferencia de los lenguajes libres de contexto generales, los LLC determinísticos están clausurados por complemento:
+
+\begin{theorem*}
+    Sea $\L$ un lenguaje libre de contexto determinístico. Luego, $\L^c$ también es libre de contexto determinístico.
+\end{theorem*}
+
+Sea $M = \langle Q, \Sigma, \Gamma, \delta, q_0, Z_0, F\rangle$ un APD tal que $\L(M) = \L$. En este caso, no basta con complementar el conjunto de estados finales del autómata, ya que podría pasar que:
+\begin{enumerate}
+    \item $M$ sea incompleto, y por ende no acepta una cadena por toma alguna transición vacía. En ese caso, el autómata con estados finales complementados también rechazaría esa cadena.
+    \item $M$ entre en un ciclo infinito de transiciones-$\lambda$ para alguna cadena. En este caso, la cadena tampoco se acepta en el autómata con estados finales complementados, porque nunca se llega a consumir por completo.
+    \item $M$ consume toda la cadena de entrada, pero llega a un punto en el que se pueden alcanzar estados finales y no-finales por medio de transiciones-$\lambda$. En este caso, el autómata con estados finales complementados también aceptaría la cadena.
+\end{enumerate}
+
+Debemos mitigar todos estos problemas para encontrar un autómata que acepte exactamente el lenguaje complementado $\L^c$. 
+
+\subsubsection{Configuraciones Ciclantes}
+
+Una configuración $(q, w, \alpha)$ \textbf{cicla} cuando existes secuencias infinitas de estados $p_1, p_2, \dots$ y cadenas $\beta_1, \beta_2, ...$ con $|\beta_i| \geq \alpha$\footnote{Si se tiene algún $\beta_j$ con longitud menor, se podría tomar como el nuevo principio de la cadena de configuraciones ciclantes. Como la longitud está acotada por debajo (por $0$), hay alguna $\beta_m$ en la cadena con longitud mínima.} tales que:
+$$
+    (q, w, \alpha) \vdash (p_1, w, \beta_1) \vdash (p_2, w, \beta_2) \vdash \cdots \vdash (p_i, w, \beta_i) \vdash \cdots
+$$
+
+Es decir, es una secuencia de configuraciones en la cual nunca se leen símbolos de entrada, y la pila mantiene su longitud inicial.
+
+Se puede ver que existe una cota en la cantidad máxima de transiciones que puede hacer $M$ sin leer de la entrada y sin repetir el estado ni el tope de la pila. Para encontrarla, denotemos como $\ell$ al número máximo de símbolos que se escriben en la pila para alguna transición:
+$$
+    \ell := \max \{|\tau| \mid \exists q, p \in Q, a \in \Sigma, t \in \Gamma : (p, \tau) \in \delta(q, a, t)\}
+$$
+
+Luego, el autómata puede escribir hasta $|Q| |\Gamma| \ell$ símbolos en la pila antes de repetir el estado o el tope de la pila. Por ende, la cantidad máxima de configuraciones distintas por las que se pueden pasar sin leer ningún símbolo de la cadena es:
+$$
+\begin{aligned}
+    K & := |Q| \times |\{\tau \in \Gamma^* \mid |\tau| \leq |Q| |\Gamma| \ell\}| \\
+    & = |Q| \sum_{i=0}^{|Q| |\Gamma| \ell} |\Gamma|^i \\
+    & = |Q| \frac{|\Gamma|^{|Q| |\Gamma| \ell - 1} - 1}{|\Gamma| - 1}
+\end{aligned}
+$$
+
+Esto implica que es posible detectar cuándo un autómata entra en una configuración ciclante: luego de ejecutarlo por $K + 1$ pasos, o bien repetió alguna configuración (y en tal caso entró en un ciclo infinito), o debe consumir algún símbolo de la entrada.

@@ -55,3 +55,21 @@
 
     Luego, $w \in \L(M') \iff w \in \L \cap R$, así que $\L \cap R$ es libre de contexto.
 \end{proof}
+
+\subsection{No-clausura}
+
+Se puede verificar que los lenguajes libres de contexto \textbf{no} están clausurados por ciertas operaciones.
+
+\subsubsection{Intersección}
+
+Para refutar la clausura por intersección, se pueden considerar los lenguajes $\L_1 = \{a^i b^j c^j \mid a,b,c \in \Sigma^*, i,j \geq 0\}$ y $\L_2 = \{a^i b^i c^j \mid a,b,c \in \Sigma^*, i,j \geq 0\}$. Ambos son libres de contexto: son concatenaciones entre lenguajes de la forma $\{x^i y^i\}$ (que son libres de contexto) y lenguajes $z^*$ (que son regulares, así que también son libres de contexto).
+
+Por otro lado, su intersección $\L_1 \cap \L_2 = \{a^i b^i c^i \mid a,b,c \in \Sigma^*, i \geq 0\}$ no puede ser libre de contexto, debido al lema de pumping: tomando la cadena $w = a^p b^p c^p$, cualquier descomposición $w = rxyzs$ tendrá a $xyz$ como una cadena que contiene sólo $a$s y $b$s o sólo $b$s y $c$s (porque tiene longitud máxima $p$). Luego, al bombearla, se agregarían sólo 2 de los 3 tipos de símbolos, así que la nueva cadena no estaría en $\L_1 \cap \L_2$ (así que el lenguaje no es libre de contexto).
+
+\subsubsection{Complemento}
+
+Es fácil ver que los lenguajes libres de contexto no están clausurados por complemento: si lo estuvieran, entonces para dos lenguajes LCs $\L_1, \L_2$ se tendría que $\left(\L_1^c \cup \L_2^c\right)^c = \L_1 \cap \L_2$ es libre de contexto (recién vimos que esto es falso).
+
+\subsubsection{Diferencia}
+
+De nuevo, se puede refutar en base a propiedades anteriores: si los LLCs estuvieran cerrados por diferencia, para cualquier LLC $\L$, el lenguaje $\Sigma^* \setminus \L = \L^c$ también sería LC (absurdo, por la propiedad anterior).
