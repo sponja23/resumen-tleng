@@ -51,3 +51,36 @@ $$
 $$
 
 Esto implica que es posible detectar cuándo un autómata entra en una configuración ciclante: luego de ejecutarlo por $K + 1$ pasos, o bien repetió alguna configuración (y en tal caso entró en un ciclo infinito), o debe consumir algún símbolo de la entrada.
+
+\subsubsection{APD Continuo}
+
+Un autómata de pila determinístico $M = \langle Q, \Sigma, \Gamma, \delta, q_0, Z_0, F \rangle$ es \textbf{continuo} cuando ``siempre lee toda la cadena de entrada'', es decir, para toda cadena $w \in \Sigma^*$ existen $p \in Q$ y $\alpha \in \Gamma^*$ tales que $(q_0, w, Z_0) \vdash^* (p, \lambda, \alpha)$.
+
+\begin{lemma*}
+    Para todo APD $M = \langle Q, \Sigma, \Gamma, \delta, q_0, Z_0, F \rangle$ existe otro APD equivalente y continuo.
+\end{lemma*}
+\begin{proof}
+    Primero, notemos que se puede asumir que $M$ es completo: si tuviera estados que se indefinen para algún símbolo de entrada/pila, se podría agregar un estado trampa al que transicionan.
+    
+    Se puede tomar el autómata de pila $M' = \langle Q \cup \{f, t\}, \Sigma, \Gamma, \delta', q_0, Z_0, F \cup \{f\} \rangle$, donde la función de transición $\delta'$ ``arregla'' los casos de transiciones ciclantes o incompletas. Para definirla, consideremos los conjuntos:
+    $$
+    \begin{aligned}
+        C_1 & := \{(q, Z) \in Q \times \Gamma \mid (q, \lambda, Z) \text{ es ciclante } \land \nexists g \in F : (\exists \alpha \in \Gamma^* : (q, \lambda, Z) \vdash^* (g, \lambda, \alpha)) \} \\
+        C_2 & := \{(q, Z) \in Q \times \Gamma \mid (q, \lambda, Z) \text{ es ciclante } \land \exists g \in F, \alpha \in \Gamma^* : (q, \lambda, Z) \vdash^* (g, \lambda, \alpha)) \}
+    \end{aligned}
+    $$
+
+    Es decir, $C_1$ es el conjunto de los estados que pertenecen a una secuencia ciclante sin ningún estado final, y $C_2$ es el conjunto de los estados que pertenecen a una secuencia ciclante en la que sí hay algún estado final.
+
+    Luego, podemos definir $\delta'$ de la siguiente manera:
+    \begin{itemize}
+        \item $\forall (q, Z) \notin (C_1 \cup C_2), \delta'(q, a, Z) = \delta(q, a, Z)\ \forall a \in \Sigma \cup \{\lambda\}$
+        \item $\forall (q, Z) \in C_1, \delta'(q, \lambda, Z) = (t, Z)$
+        \item $\forall (q, Z) \in C_2, \delta'(q, \lambda, Z) = (f, Z)$
+        \item $\forall a \in \Sigma, Z \in \Gamma, \delta'(f, a, Z) = (t, Z) \land \delta'(t, a, Z) = (t, Z)$
+    \end{itemize}
+\end{proof}
+
+\subsubsection{Demostración de Clausura}
+
+
