@@ -9,8 +9,9 @@ Dada una gramática libre de contexto $G = \langle V_N, V_T, P, S \rangle$ y una
 Por otro lado, un \textbf{árbol de derivación más a la izquierda/derecha} es un árbol de derivación que corresponde a una derivación más a la izquierda/derecha.
 
 \subsection{Recursiva a Izquierda/Derecha}
+\label{recursiva-a-izquierda-cota}
 
-Una gramática es \textbf{recursiva a izquierda} cuando hay algún símbolo $A \in V_N$ y cadena $\alpha \in (V_T \cup V_N)^*$ tal que $A \overset{+}{\derivL} A \alpha$. Análogamente, una gramática es \textbf{recursiva a derecha} cuando se puede derivar $A \overset{+}{\derivR} \alpha A$.
+Una gramática es \textbf{recursiva a izquierda} cuando hay algún símbolo $A \in V_N$ y cadena $\alpha \in (V_T \cup V_N)^*$ tal que $A \derivp A \alpha$. Análogamente, una gramática es \textbf{recursiva a derecha} cuando se puede derivar $A \derivp \alpha A$.
 
 \subsection{Demostración de la Cota}
 
@@ -31,12 +32,9 @@ Podemos enunciar y demostrar la cota en la cantidad de derivaciones:
 
     Supongamos que hay alguna rama de longitud mayor a $k (n + 2)$ arcos. Luego, como todas las ramas a la derecha de $n_0$ tienen longitud menor a ésta, debe haber alguna rama con longitud mayor a $k (n + 2)$ que llega a $n_0$ o algún nodo a su izquierda. Además, por su ubicación, las hojas de esta rama deben formar alguna cadena $x$ contenida en $wB$.
 
-    Consideremos segmentos de longitud $k$ en esta rama $S_1, \dots, S_{n + 2}$. Cada uno de ellos contiene nodos que derivan en hojas, pero cada hoja tiene un único ancestro más bajo en la rama\footnote{Éste es el ancestro que se ubica en el nivel más bajo del árbol, dentro de los que están en la rama. Por ejemplo, todos los nodos tienen como ancestro a la raíz, pero es posible que algunos sean descendientes de nodos que están más abajo (pero dentro de la rama).}. Sea $f: \{S_1, \dots S_{n + 2}\} \to \mathcal P(\textsc{Símbolos}(x))$ la función definida como:
-    $$
-        f(S_i) := \{a \in \textsc{Símbolos(x)} \mid \exists n \in S_i : n \text{ es el ancestro más bajo de } a\}
-    $$
+    Consideremos segmentos de longitud $k$ en esta rama $S_1, \dots, S_{n + 2}$. Cada uno de ellos contiene nodos que derivan en hojas, pero cada hoja tiene un único ancestro más bajo en la rama\footnote{Éste es el ancestro que se ubica en el nivel más bajo del árbol, dentro de los que están en la rama. Por ejemplo, todos los nodos tienen como ancestro a la raíz, pero es posible que algunos sean descendientes de nodos que están más abajo (pero dentro de la rama).}. Sea $f: \textsc{Símbolos}(x) \to \{S_1, \dots S_{n + 2}\}$ la función que mapea cada símbolo de $x$ a su ancestro más bajo.
 
-    Como la cadena $x$ está contenida en $wB$, tiene longitud de a lo sumo $|wB| = n + 1$. Al haber $n + 2$ segmentos, debe haber algún $S_i = n_1, \dots, n_k$ tal que $f(S_i) = \emptyset$ (por el principio del palomar).  
+    Como la cadena $x$ está contenida en $wB$, tiene longitud de a lo sumo $|wB| = n + 1$. Al haber $n + 2$ segmentos, debe haber algún $S_i = n_1, \dots, n_k$ tal que $f^{-1}(S_i) = \emptyset$ (por el principio del palomar).  
     
     Para cada $n_j$ de $S_i$, todos sus descendientes directos anteriores a $n_{j + 1}$ deben ser $\lambda$ o símbolos anulables, porque si no $n_j$ sería el antecesor más bajo de algún símbolo de $x$. Además, como hay $k$ símbolos no terminales, debe haber algún par de nodos con la misma etiqueta $X$. Es decir, la gramática incluye la derivación $X \derivp Y_1 \cdots Y_m X \gamma$ con $Y_1, \dots, Y_m$ anulables ($Y_j \derivs \lambda$), así que:
     $$
