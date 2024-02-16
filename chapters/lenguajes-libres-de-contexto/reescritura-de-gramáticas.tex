@@ -1,0 +1,158 @@
+\section{Reescritura de Gramáticas Libres de Contexto}
+
+En esta sección, analizaremos propiedades de las gramáticas libres de contexto y métodos para modificarlas.
+
+\subsection{Símbolos Inútiles}
+
+Sea $G = \langle V_N, V_T, P, S \rangle$. Un símbolo inútil $A \in V_N^*$ es uno para el cual no hay una derivación:
+$$
+    S \derivs w A y \derivs w x y
+$$
+
+Es decir, que no es alcanzable por derivaciones desde $S$ (es \textit{inaccesible}), o desde el cual no se puede llegar a una cadena de terminales. Para determinar la segunda propiedad, se puede un algoritmo similar al de \hyperref[glc-vacia2]{algoritmo de vacuidad} para obtener el conjunto de terminales que llegan a una cadena, mientras que la primera se puede verificar haciendo DFS sobre las producciones de la gramática, empezando por $S$.
+
+Esto quiere decir que se puede obtener una gramática sin símbolos inútiles de la siguiente manera:
+\begin{itemize}
+    \item Computar el conjunto de símbolos inútiles $I$.
+    \item Armar la gramática $G' = \langle V_N \setminus I, V_T, P', S \rangle$, donde $P' \subseteq P$ son las producciones en las que no participa ningún símbolo de $I$.
+\end{itemize}
+
+Claramente, $\L(G) = \L(G')$, porque ninguna derivación de $G$ incluía símbolos/producciones que no estén en $G'$.
+
+\subsection{Gramáticas Propias}
+
+Una producción-$\lambda$ es una de la forma $A \to \lambda$, y una GLC $G = \langle V_N, V_T, P, S \rangle$ es propia cuando no tiene ninguna producción-$\lambda$ excepto por $S \to \lambda$.
+
+Por otro lado, un símbolo $A \in V_N$ es \textbf{anulable} cuando $A \derivs \lambda$. El conjunto de símbolos anulables $V_\lambda$ se puede computar mediante el siguiente algoritmo:
+
+\begin{algorithm}[H]
+    \caption{Cómputo del conjunto de símbolos anulables.}
+    \label{simbolos-anulables}
+    \begin{algorithmic}[1]
+        \Procedure{SímbolosAnulables}{$G = \langle V_T, V_N, P, S \rangle$}
+        \State $V_0 \gets \{A \mid A \to \lambda \in P\}$
+        \State $i \gets 1$
+        \Repeat
+        \State $V_i \gets V_{i - 1} \cup \{A \mid \exists A \to X_1 \cdots X_k \in P : \forall 1 \leq i \leq k, \ X_i \in V_{i - 1} \}$
+        \State $i \gets i + 1$
+        \Until{$V_i = V_{i - 1}$}
+        \State \Return $V_i$
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+Luego, se puede obtener una gramática propia mediante el siguiente algoritmo:
+\begin{algorithm}[H]
+    \caption{Transformación a gramática propia.}
+    \label{gramatica-propia}
+    \begin{algorithmic}[1]
+        \Procedure{GramáticaPropia}{$G = \langle V_T, V_N, P, S \rangle$}
+        \State $V_\lambda \gets \textsc{SímbolosAnulables}(G)$
+        \State $P' \gets \emptyset$
+        \For{$A \to X_1 \cdots X_k \in P \mid X_1 \cdots X_k \neq \lambda$}
+            \State $X_{i_1} \cdots X_{i_n} \gets X_1 \cdots X_k \cap V_\lambda$  \Comment{Símbolos anulables del cuerpo}
+            \For{$X_{j_1} \cdots X_{j_m}$ subcadena de $X_{i_1} \cdots X_{i_n}$}
+            \State $P' \gets P' \cup \{A \to (X_1 \cdots X_k \setminus \{X_{j_1}, \dots, X_{j_m}\})\}$
+            \EndFor
+        \EndFor
+        \If{$\lambda \in \L(G)$}
+            \State $P' \gets P' \cup \{S \to \lambda\}$
+        \EndIf
+        \State \Return $\langle V_N, V_T, P', S \rangle$
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+El algoritmo itera por todas las producciones de $P$, descartando las que tienen cuerpo $\lambda$, y para las otras agrega todas las posibles cadenas que se forman al eliminar combinaciones de sus símbolos anulables. De esta forma, el lenguaje sigue siendo el mismo, pero la gramática es propia.
+
+\subsection{Producciones Unitarias}
+
+Una \textbf{producción unitaria} es una de la forma $A \to B$, con $A, B \in V_N$. Lo único que indica esta producción es que el símbolo $A$ se puede reemplazar por $B$ en cualquier lugar que se encuentre.
+
+Para eliminar estas producciones, es conveniente considerar la relación de alcanzabilidad por producciones unitarias, dada por $A \prec^U B \iff A \derivs B$\footnote{La notación $\mathop{\prec^U}$ no es estándar.}. Esta relación se puede computar fácilmente por medio de DFS o BFS\footnote{Este algoritmo es sólo el cómputo de una clausura transitiva.}:
+\begin{algorithm}[H]
+    \caption{Cómputo de alcanzabilidad por producciones unitarias.}
+    \label{alcanzabilidad-unitarias}
+    \begin{algorithmic}[1]
+        \Procedure{AlcanzabilidadProduccionesUnitarias}{$G = \langle V_T, V_N, P, S \rangle$}
+        \State $\mathop{\prec^U_0} \gets \{(A, A) \mid A \in V_N\}$
+        \State $i \gets 1$
+        \Repeat
+        \State $\mathop{\prec^U_i} \gets \mathop{\prec^U_0} \cup \{(X, Z) \in V_N \times V_N \mid \exists Y \in V_N : X \to Y \in P \land Y \prec^U_{i - 1} Z\}$
+        \State $i \gets i + 1$
+        \Until{$\mathop{\prec^U_i} = \mathop{\prec^U_{i - 1}}$}
+        \State \Return $V_i$
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+Luego, para obtener una gramática sin producciones unitarias, se puede usar el siguiente algoritmo:
+
+\begin{algorithm}[H]
+    \caption{Eliminación de producciones unitarias.}
+    \label{producciones-unitarias}
+    \begin{algorithmic}[1]
+        \Procedure{SinProduccionesUnitarias}{$G = \langle V_T, V_N, P, S \rangle$}
+        \State $\prec^U \gets \textsc{AlcanzabilidadProduccionesUnitarias}$
+        \State $P' \gets \emptyset$
+        \For{$A, B \in V_N \mid A \prec^U B$}
+        \State $P' \gets P' \cup \{A \to \alpha \mid B \to \alpha \in P\} \setminus \{A \to B\}$
+        \EndFor
+        \State \Return $\langle V_N, V_T, P', S \rangle$
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+Notemos que, como $X \prec^U X \forall X \in V_N$, $P'$ tiene todas las producciones de $P$ (excepto por las unitarias), y se agregan nuevas producciones $A \to \alpha$ para todos los símbolos que alcanzan a otros por producciones unitarias ($A \prec^U B$).
+
+\subsection{Gramática sin Ciclos}
+
+Un \textbf{ciclo} en una gramática $G$ se da cuando un símbolo se puede derivar a sí mismo: $A \derivp A$. Por ende, una \textbf{gramática sin ciclos} es una en la que no hay ninguna de esas derivaciones.
+
+En las gramáticas libres de contexto, la existencia de un ciclo requiere producciones-$\lambda$ o producciones unitarias (es fácil de demostrar por inducción en la cantidad de derivaciones de un ciclo). Por ende, si se aplican los métodos para eliminar producciones-$\lambda$ y producciones unitarias, la gramática resultantes es sin ciclos.
+
+\subsection{Gramática Recursiva a Izquierda/Derecha}
+
+Una gramática $G = \langle V_N, V_T, P, S \rangle$ libre de contexto es \textbf{recursiva a izquierda} cuando tiene algún $A \in V_N$ que cumple:
+$$
+    A \derivp A \alpha
+$$
+
+Además, una producción de la forma $A \to A \alpha$ se denomina \textbf{recursión inmediata} (por izquierda).
+
+Análogamente, la recursión por derecha se da cuando $A \derivp \alpha A$.
+
+Para cualquier gramática $G$, se puede obtener una gramática equivalente sin recursión a izquierda.
+
+\subsubsection{Eliminación de Recursión Inmediata}
+
+Sea $G = \langle V_N, V_T, P, S \rangle$ una gramática con producciones de la forma:
+$$
+    A \to A \alpha_1 \mid \cdots \mid A \alpha_k \mid \beta_1 \mid \cdots \mid \beta_n
+$$
+
+Donde las cadenas $\beta_i$ no empiezan con $A$.
+
+Luego, se puede intercambiar la recursión por izquierda inmediata de esta gramática por recursión por derecha. Para lograrlo, se agrega un nuevo símbolo $A'$, y se reemplazan las producciones anteriores por:
+$$
+\begin{aligned}
+    A & \to \beta_1 \mid \cdots \mid \beta_n \mid \beta_1 A' \mid \cdots \mid \beta_n A' \\
+    A & \to \alpha_1 \mid \cdots \mid \alpha_k \mid \alpha_1 A' \mid \cdots \mid \alpha_k A'
+\end{aligned}
+$$
+
+Luego, para cualquier derivación de la gramática anterior con la forma:
+$$
+    A \to A \alpha_{i_1} \to A \alpha_{i_2} \alpha_{i_1} \to \cdots \to \beta_j \alpha_{i_m} \cdots \alpha_{i_1}
+$$
+
+La gramática nueva $G = \langle V_N \cup A', V_T, P', S \rangle$ puede llegar a la misma cadena por medio de:
+$$
+    A \to \beta_j A' \to \beta_j \alpha_{i_m} A' \to \cdots \to \beta_j \alpha_{i_m} \cdots \alpha_{i_1}
+$$
+
+Notemos que, si $P$ tenía $k$ producciones con cabeza $A$, se agregan $k$ producciones a $P'$.
+
+\subsubsection{Eliminación de Recursión No-Inmediata}
+
+
