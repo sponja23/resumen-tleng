@@ -133,11 +133,11 @@ $$
 
 Donde las cadenas $\beta_i$ no empiezan con $A$.
 
-Luego, se puede intercambiar la recursión por izquierda inmediata de esta gramática por recursión por derecha. Para lograrlo, se agrega un nuevo símbolo $A'$, y se reemplazan las producciones anteriores por:
+Luego, se puede intercambiar la recursión por izquierda inmediata de esta gramática por recursión por derecha. Para lograrlo, se agrega un nuevo símbolo $A'$, y se reemplazan las producciones anteriores por\footnote{Para que esto funcione, no debe haber ninguna producción de la forma $A \to A$ (igualmente, esas se pueden eliminar sin cambiar la gramática).}:
 $$
 \begin{aligned}
     A & \to \beta_1 \mid \cdots \mid \beta_n \mid \beta_1 A' \mid \cdots \mid \beta_n A' \\
-    A & \to \alpha_1 \mid \cdots \mid \alpha_k \mid \alpha_1 A' \mid \cdots \mid \alpha_k A'
+    A' & \to \alpha_1 \mid \cdots \mid \alpha_k \mid \alpha_1 A' \mid \cdots \mid \alpha_k A'
 \end{aligned}
 $$
 
@@ -155,4 +155,156 @@ Notemos que, si $P$ tenía $k$ producciones con cabeza $A$, se agregan $k$ produ
 
 \subsubsection{Eliminación de Recursión No-Inmediata}
 
+Para ver cómo eliminar la recursión no-inmediata, se puede tomar como ejemplo el siguiente conjunto de producciones:
+$$
+\begin{aligned}
+    A & \to BC \mid a \\
+    B & \to CA \mid Ab
+\end{aligned}
+$$
 
+La gramática es recursiva a izquierda ya que, por ejemplo:
+$$
+    A \deriv BC \deriv AbC
+$$
+
+Para arreglarla, se pueden reemplazar las ocurrencias de $A$ al principio del cuerpo de las producciones por los símbolos en los que se deriva:
+$$
+\begin{aligned}
+    A & \to BC \mid a \\
+    B & \to CA \mid BCb \mid ab
+\end{aligned}
+$$
+
+Ahora la gramática solamente tiene recursión por izquierda inmediata, que se puede eliminar con el método anterior.
+
+Generalizando esto, la idea es ordenar los símbolos de alguna forma (arbitraria) $A_1, \dots, A_n$ e ir modificando iterativamente la gramática: en cada paso, las producciones con cabeza $A_i$ se transforman para que, si empiezan con un símbolo no terminal, sea uno $A_j$, con $j > i$, y se elimina cualquier recursión inmediata que surja. Al terminar el algoritmo, no puede haber ninguna instancia de recursión no-inmediata, porque para ello se requiere que:
+$$
+    A_i \deriv A_{j_1} \alpha_1 \deriv A_{j_2} \alpha_2 \deriv \cdots \deriv A_{j_{k - 1}} \alpha_{j_{k - 1}}\deriv A_i \alpha_{j_k}
+$$
+
+Pero, como $A_i \derivp A_j \alpha$ sólo cuando $i < j$, se tendría que $i < i_1$ e $i_1 < i$ (absurdo).
+
+El algoritmo es el siguiente\footnote{La gramática de entrada no debería tener ciclos (aunque el algoritmo puede ser modificado para detectarlos y eliminarlos), producciones unitarias ni producciones-$\lambda$.}:
+
+\begin{algorithm}[H]
+    \caption{Eliminación de recursión por izquierda.}
+    \label{eliminacion-recursion-izquierda}
+    \begin{algorithmic}[1]
+        \Procedure{SinRecursiónPorIzquierda}{$G = \langle V_T, V_N, P, S \rangle$}
+        \State $A_1, \dots, A_n \gets V_N$
+        \For{$i \in \{1, \dots, n\}$}
+            \For{$j \in \{1, \dots, i - 1\}$}
+                \State Sean $A_j \to \delta_1 \mid \delta_2 \mid \cdots \mid \delta_m$ las producciones de $A_j$.
+                \For{$A_i \to A_j \gamma_k \in P$}
+                    \State Reemplazar $A_i \to A_j \gamma_k$ por $A_i \to \delta_1 \gamma_k \mid \delta_2 \gamma_k \mid \cdots \mid \delta_m \gamma_k$
+                \EndFor
+            \EndFor
+        \State Eliminar recursión inmediata para $A_i$
+        \EndFor
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+El ciclo más interno se puede eliminar por medio de \textbf{factorización por izquierda}: cuando se tienen varias producciones de la forma:
+$$
+    X \to Y \alpha_1 \mid \cdots \mid Y \alpha_n \mid \beta_1 \mid \cdots \mid \beta_m
+$$
+
+Se pueden reemplazar por:
+$$
+\begin{aligned}
+    X & \to Y Y' \mid \beta_1 \mid \cdots \mid \beta_m \\
+    Y' & \to \alpha_1 \mid \cdots \mid \alpha_n
+\end{aligned}
+$$
+
+De esta forma, $X$ tiene a lo sumo 1 producción que empieza con $Y$ para cada par de símbolos no terminales $X, Y \in V_N$.
+
+\subsubsection{Complejidad del Algoritmo}
+
+Analicemos la complejidad de peor caso del algoritmo de eliminación de recursión a izquierda. Si $c$ es la máxima cantidad de producciones con una misma cabeza, el peor caso se da cuando todas las producciones son de la forma $X \to A_1 A_2 \cdots A_n$:
+\begin{itemize}
+    \item Todas las producciones con cabeza $A_1$ tienen recursión inmediata. Esto implica que quedan $2c$ producciones con cabeza $A_1$.
+    \item Todas las producciones con cabeza $A_2$ tienen un cuerpo que empieza con $A_1$. Para cada una de ellas, hay que agregar las $2c$ producciones que quedaron para de $A_1$, y luego eliminar la recursión inmediata (porque éstas empiezan con $A_2$). Se tienen $2(2c) * c = (2c)^2$ producciones con cabeza $A_2$.
+    \item En el último paso, todas las producciones con cabeza $A_n$ empiezan con $A_1$, y se tiene una cantidad de producciones dada por:
+    $$
+        2c \prod_{i = 0}^{n - 1} (2c)^{2^i} = 2c (2c)^{\sum_{i = 0}^{n - 1} 2^i} = 2c (2c)^{2^n - 1} = (2c)^{2^n}
+    $$
+\end{itemize}
+
+En el peor caso, se agregan menos de $2(2c)^{2n}$. Sin embargo, el tiempo de ejecución depende fuertemente del orden en el que se recorren los símbolos.
+
+\subsection{Forma Normal de Chomsky}
+
+Una gramática libre de contexto $G = \langle V_N, V_T, P, S \rangle$ está en \textbf{forma normal de Chomsky} cuando todas sus producciones son de la forma:
+$$
+    A \to BC \\
+    A \to a
+$$
+
+Con $A, B, C \in V_N$ y $a \in V_T$. Además, se puede agregar $S \to \lambda$.
+
+Todo lenguaje libre de contexto tiene una gramática en FNC. Para pasar una gramática cualquiera $G = \langle V_N, V_T, P, S \rangle$ a una $G' = \langle V_N', V_T, P', S' \rangle$ en FNC, primero se deben eliminar producciones-$\lambda$ y unitarias. Luego, el conjunto de producciones $P'$ se debe construir de la siguiente manera:
+\begin{itemize}
+    \item Agregar $S' \to S$ y, si $\lambda \in \L(G)$, agregar $S' \to \lambda$.
+    \item Agregar todas las producciones que ya están en FNC (todas las $A \to a$ y $A \to BC$ con $a \in V_T,$ y $A,B,C \in V_N$).
+    \item Para cada producción $A \to X_1 X_2$ donde alguno/s de $X_1$ y $X_2$ es/son terminal/es, agregar:
+    $$
+        A \to X_1' X_2'
+    $$
+    \item Para cada producción $A \to X_1 \cdots X_k$ con $k > 2$, poner las producciones:
+    $$
+    \begin{aligned}
+        A & \to X_1' \langle X_2 \cdots X_k \rangle \\
+        \langle X_2 \cdots X_k \rangle & \to X_2' \langle X_3 \cdots X_k \rangle \\
+        & \vdots \\
+        \langle X_{k - 1} X_k \rangle & \to X_{k - 1}' X_k
+    \end{aligned}
+    $$
+    \item Para cada símbolo $X_i'$ de los casos anteriores,
+    \begin{itemize}
+        \item Si $X_i \in V_T$, $X_i'$ es un símbolo de $V_N$, y se debe agregar $X_i' \to X_i$.
+        \item Si $X_i \in V_N$, $X_i' = X_i$.
+    \end{itemize}
+    \item Cada $\langle X_j \cdots X_k \rangle$ de los casos anteriores es un símbolo nuevo de $V_N$.
+\end{itemize}
+
+Este método resulta en una gramática con $|V_N'| \leq |V_N| + |V_T| + \ell |P|$ ($\ell$ es el largo máximo de los cuerpos de producciones en $P$), y corre en un tiempo lineal en $|P|$.
+
+\subsection{Forma Normal de Greibach}
+
+Una gramática libre de contexto $G = \langle V_N, V_T, P, S \rangle$ está en \textbf{forma normal de Greibach} cuando todas sus producciones son de la forma:
+$$
+    A \to a \alpha
+$$
+
+Con $a \in V_T$ y $\alpha \in V_N^*$.
+
+Todo lenguaje libre de contexto tiene una gramática en FNG. Para pasar una gramática cualquiera $G = \langle V_N, V_T, P, S \rangle$ a una $G' = \langle V_N', V_T, P', S' \rangle$ en FNG, primero se deben eliminar producciones-$\lambda$ y la recursión a izquierda. Luego, se puede definir un orden total sobre los símbolos $A_1 < A_2 < \cdots < A_n$ de forma tal que en cada producción $A \to \alpha$, el cuerpo $\alpha$ empieza con un símbolo terminal o un no-terminal $B$ que cumple $A < B$\footnote{Esto sucede por la falta de recursión a izquierda: la relación $A \prec B \iff (\exists \alpha \in (V_N \cup V_T)^* \mid A \derivp B \alpha)$ debe ser de orden, porque claramente es transitiva y, si no fuera antisimétrica, se tendría que $A \derivp A \alpha$ para algún $\alpha$.}. El algoritmo es el siguiente:
+
+\begin{algorithm}[H]
+    \caption{Forma Normal de Greibach.}
+    \label{forma-normal-de-greibach}
+    \begin{algorithmic}[1]
+        \Procedure{FNG}{$G = \langle V_T, V_N, P, S \rangle$}
+        \State Eliminar producciones-$\lambda$ y recursión por izquierda de $G$
+        \State Obtener el orden $A_1 < A_2 < \cdots < A_n$ con $A_i \not\to A_j \alpha\ \forall j < i$
+        \For{$i = n - 1, \dots, 1$}
+            \For{$A_i \to A_j \alpha \mid j > i$}
+                \State Sean $A_j \to \beta_1 \mid \cdots \mid \beta_m$ las producciones con cabeza $A_j$
+                \State Reemplazar $A_i \to A_j \alpha$ por $A_i \to \beta_1 \alpha \mid \cdots \mid \beta_m \alpha$
+            \EndFor
+            \For{$A \to a X_1 \cdots X_k$} \Comment{Todas las producciones de $A$ deben tener esta estructura.}
+                \For{$X_i \in \{X_1, \dots, X_k\}$}
+                    \State Si $X_i \in V_N$, $X_i' = X_i$.
+                    \State Si $X_i \in V_T$, agregar un nuevo símbolo $X_i'$ junto con la producción $X_i' \to X_i$.
+                \EndFor
+                \State Reemplazar $A \to a X_1 \cdots X_k$ por $A \to a X_1' \cdots X_k'$.
+            \EndFor
+        \EndFor
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+En cada paso del ciclo externo del algoritmo, se transforman todas las producciones con símbolos $A_i$ para que queden en FNG (empiezan con terminal y siguen con no-terminales).
